@@ -6,8 +6,8 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-(setq user-full-name "John Doe"
-      user-mail-address "john@doe.com")
+(setq user-full-name "Christian Packard"
+      user-mail-address "christian@cpacklabs.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -21,8 +21,9 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 
-(setq doom-font (font-spec :family "Fira Code" :size 13 :weight 'semi-light))
-
+(setq doom-font (font-spec :family "Fira Code" :size 13 :weight 'semi-light)
+      doom-big-font (font-spec :family "Fira Code" :size 24)
+      doom-variable-pitch-font (font-spec :size 13))
 
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -36,7 +37,7 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -75,9 +76,28 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+
+;; Modeline
+;; - add current workspace name
+;; - add major mode icon
+(after! doom-modeline
+  (setq doom-modeline-persp-name t
+        doom-modeline-major-mode-icon t))
+
 ;; Start Doom Emacs maximized
 (add-hook 'window-setup-hook #'toggle-frame-fullscreen)
 
+;; Delete whitespace on save, including in markdow-mode
+(setq ws-butler-global-exempt-modes '(special-mode comint-mode term-mode eshell-mode diff-mode))
+
+;; Which-key and Evil Key Bindings - Spacemacs style
+(load! "+bindings")
+
+;; Clojure mode & Cider Configuration + key bindings
+(load! "+clojure")
+
+;; Structural Editing - Smartparens
+(load! "+smartparens.el")
 
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
@@ -91,17 +111,17 @@
                                                                   projectile-project-root-files-bottom-up)))
 
 ;; def portal to the dev namespace to allow dereferencing via @dev/portal
-(defun portal.api/open ()
-  (interactive)
-  (cider-nrepl-sync-request:eval
-    "(do (ns dev)
-         (def portal ((requiring-resolve 'portal.api/open) {:launcher :emacs}))
-         (add-tap (requiring-resolve 'portal.api/submit)))"))
+;; (defun portal.api/open ()
+;;   (interactive)
+;;   (cider-nrepl-sync-request:eval
+;;     "(do (ns dev)
+;;          (def portal ((requiring-resolve 'portal.api/open) {:launcher :emacs}))
+;;          (add-tap (requiring-resolve 'portal.api/submit)))"))
 
-(defun portal.api/clear ()
-  (interactive)
-  (cider-nrepl-sync-request:eval "(portal.api/clear)"))
+;; (defun portal.api/clear ()
+;;   (interactive)
+;;   (cider-nrepl-sync-request:eval "(portal.api/clear)"))
 
-(defun portal.api/close ()
-  (interactive)
-  (cider-nrepl-sync-request:eval "(portal.api/close)"))
+;; (defun portal.api/close ()
+;;   (interactive)
+;;   (cider-nrepl-sync-request:eval "(portal.api/close)"))
