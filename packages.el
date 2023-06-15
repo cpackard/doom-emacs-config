@@ -51,3 +51,7 @@
 
 ;; Koacha test runner in Emacs
 (package! kaocha-runner)
+
+;; Github Copilot
+(package! copilot
+  :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
