@@ -75,6 +75,9 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+;; Start Doom Emacs maximized
+(add-hook 'window-setup-hook #'toggle-frame-fullscreen)
+
 
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
@@ -86,3 +89,19 @@
 ;; `projectile-project-root-files-bottom-up' (a variable)
 (after! projectile (setq projectile-project-root-files-bottom-up (remove ".git"
                                                                   projectile-project-root-files-bottom-up)))
+
+;; def portal to the dev namespace to allow dereferencing via @dev/portal
+(defun portal.api/open ()
+  (interactive)
+  (cider-nrepl-sync-request:eval
+    "(do (ns dev)
+         (def portal ((requiring-resolve 'portal.api/open) {:launcher :emacs}))
+         (add-tap (requiring-resolve 'portal.api/submit)))"))
+
+(defun portal.api/clear ()
+  (interactive)
+  (cider-nrepl-sync-request:eval "(portal.api/clear)"))
+
+(defun portal.api/close ()
+  (interactive)
+  (cider-nrepl-sync-request:eval "(portal.api/close)"))
