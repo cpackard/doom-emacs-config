@@ -125,3 +125,6 @@
 ;; (defun portal.api/close ()
 ;;   (interactive)
 ;;   (cider-nrepl-sync-request:eval "(portal.api/close)"))
+
+;; Associate `.cljc' files with clojure-mode
+(add-to-list 'auto-mode-alist '("\\.cljc\\'" . clojure-mode))
