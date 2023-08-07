@@ -142,6 +142,12 @@
       "M-[" #'lispyville-previous-opening
       "M-]" #'lispyville.next-opening)
 
+(map! :after evil
+      :niv "M-n" #'evil-pop-paste-next
+      :niv "M-p" #'evil-paste-pop
+      :niv "C-n" #'evil-next-line
+      :niv "C-p" #'evil-previous-line)
+
 ;; Github Copilot
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
