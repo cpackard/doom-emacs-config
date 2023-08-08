@@ -148,6 +148,11 @@
       :niv "C-n" #'evil-next-line
       :niv "C-p" #'evil-previous-line)
 
+;; Rebind C-v to scroll-up command to mimic expected Emacs functionality
+;; of C-v / M-v for scrolling the page up and down respectively.
+(map! :map vertico-map
+      :g "C-v" #'vertico-scroll-up)
+
 ;; Github Copilot
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
