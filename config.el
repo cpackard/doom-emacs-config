@@ -99,6 +99,9 @@
 ;; Structural Editing - Smartparens
 (load! "+smartparens.el")
 
+;; Python mode bindings
+(load! "+python.el")
+
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
@@ -152,20 +155,6 @@
 ;; of C-v / M-v for scrolling the page up and down respectively.
 (map! :map vertico-map
       :g "C-v" #'vertico-scroll-up)
-
-(after! dap-mode
-  (setq dap-python-debugger 'debugpy)
-  (dap-register-debug-template "core-api"
-   (list :type "python"
-         :args "runserver --noreload"
-         :cwd (expand-file-name "~/onsiteiq/core_api")
-         :module nil
-         :console "integratedTerminal"
-         :program (expand-file-name "~/onsiteiq/core_api/manage.py")
-         :env '(("DEBUG" . "1"))
-         :request "launch"
-         :name "core-api dap: Django"
-         :django t)))
 
 ;; Github Copilot
 (use-package! copilot
