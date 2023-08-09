@@ -149,7 +149,8 @@
       :niv "M-n" #'evil-pop-paste-next
       :niv "M-p" #'evil-paste-pop
       :niv "C-n" #'evil-next-line
-      :niv "C-p" #'evil-previous-line)
+      :niv "C-p" #'evil-previous-line
+      :nv  "C-'" #'comment-dwim)
 
 ;; Rebind C-v to scroll-up command to mimic expected Emacs functionality
 ;; of C-v / M-v for scrolling the page up and down respectively.
