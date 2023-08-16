@@ -102,6 +102,9 @@
 ;; Python mode bindings
 (load! "+python.el")
 
+;; Fennel mode bindings
+(load! "+fennel.el")
+
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
@@ -165,3 +168,4 @@
               ("TAB" . 'copilot-accept-completion)
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
