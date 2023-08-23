@@ -59,3 +59,6 @@
 (package! org-appear
   :recipe (:host github
            :repo "awth13/org-appear"))
+
+;; modern API for working with files and directories in Emacs.
+(package! f)
