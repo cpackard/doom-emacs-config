@@ -23,7 +23,7 @@
 
 (setq doom-font (font-spec :family "Fira Code" :size 14)
       doom-big-font (font-spec :family "Fira Code" :size 20)
-      doom-variable-pitch-font (font-spec :family "Source Serif 4" :size 16))
+      doom-variable-pitch-font (font-spec :family "ETBembo" :size 16))
 
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -34,6 +34,8 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
+;; (setq doom-theme 'doom-flatwhite)
+;; (setq doom-theme 'doom-gruvbox)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -105,6 +107,8 @@
 ;; Fennel mode bindings
 (load! "+fennel.el")
 
+;; Org mode bindings
+(load! "+org.el")
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
