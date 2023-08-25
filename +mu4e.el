@@ -74,24 +74,30 @@
                         (mu4e-trash-folder . "/fastmail/Trash")))))
 
       (if gmail-email
-          (setq mu4e-contexts
-                (append mu4e-contexts `(,(make-mu4e-context
-                                          :name "gmail"
-                                          :enter-func
-                                          `(lambda () (mu4e-message (format "Enter %s context" ,gmail-email)))
-                                          :leave-func
-                                          `(lambda () (mu4e-message (format "Leave %s context" ,gmail-email)))
-                                          :match-func
-                                          `(lambda (msg)
-                                             (when msg
-                                               (mu4e-message-contact-field-matches msg
-                                                                                   :to ,gmail-email)))
-                                          :vars `((user-mail-address . ,gmail-email)
-                                                  (user-full-name . "Christian Packard")
-                                                  (mu4e-drafts-folder . "/gmail/Drafts")
-                                                  (mu4e-refile-folder . "/gmail/Archive")
-                                                  (mu4e-sent-folder . "/gmail/Sent")
-                                                  (mu4e-trash-folder . "/gmail/Trash")))))))
+          (progn
+            (setq mu4e-contexts
+                  (append mu4e-contexts `(,(make-mu4e-context
+                                            :name "gmail"
+                                            :enter-func
+                                            `(lambda () (mu4e-message (format "Enter %s context" ,gmail-email)))
+                                            :leave-func
+                                            `(lambda () (mu4e-message (format "Leave %s context" ,gmail-email)))
+                                            :match-func
+                                            `(lambda (msg)
+                                               (when msg
+                                                 (mu4e-message-contact-field-matches msg
+                                                                                     :to ,gmail-email)))
+                                            :vars `((user-mail-address . ,gmail-email)
+                                                    (user-full-name . "Christian Packard")
+                                                    (mu4e-drafts-folder . "/gmail/Drafts")
+                                                    (mu4e-refile-folder . "/gmail/Archive")
+                                                    (mu4e-sent-folder . "/gmail/Sent")
+                                                    (mu4e-trash-folder . "/gmail/Trash"))))))
+            (setq   mu4e-maildir-shortcuts
+                    (append mu4e-maildir-shortcuts
+                            '(("/gmail/INBOX" . ?g)
+                              ("/gmail/Sent" . ?G))))))
+
 
       (setq mu4e-context-policy 'pick-first) ;; start with the first (default) context;
       (setq mu4e-compose-context-policy 'ask) ;; ask for context if no context matches;
