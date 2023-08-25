@@ -1,6 +1,9 @@
 ;;; +mu4e.el -*- lexical-binding: t; -*-
 
 (after! (:and mu4e f)
+  ;; Automatically wrap long lines
+  (setq-default auto-fill-function 'message-do-auto-fill)
+
   (pcase-let ((`(,icloud-email ,fastmail-email ,gmail-email)
                (s-split "\n" (f-read-text ".emails"))))
     (progn
