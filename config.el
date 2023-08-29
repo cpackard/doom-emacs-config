@@ -177,3 +177,8 @@
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<tab>" . 'copilot-accept-completion-by-word)))
 
+;; GPG
+(after! epa
+  (setf epg-pinentry-mode 'loopback)
+  ;; Hack for Emacs 29.1
+  (fset 'epg-wait-for-status 'ignore))
