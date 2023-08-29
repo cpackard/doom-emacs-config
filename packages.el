@@ -62,3 +62,7 @@
 
 ;; modern API for working with files and directories in Emacs.
 (package! f)
+
+;; Code Review
+;; https://wandersoncferreira.github.io/code-review/
+(package! code-review)
