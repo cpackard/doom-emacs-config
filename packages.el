@@ -66,3 +66,7 @@
 ;; Code Review
 ;; https://wandersoncferreira.github.io/code-review/
 (package! code-review)
+
+;; Bring Jira and org-mode together
+;; https://github.com/ahungry/org-jira
+(package! org-jira)

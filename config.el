@@ -119,6 +119,9 @@
 ;; SQL settings
 (load! "+sql.el")
 
+;; Jira settings
+(load! "+jira.el")
+
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
