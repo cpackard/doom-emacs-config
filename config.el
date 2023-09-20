@@ -122,9 +122,6 @@
 ;; Jira settings
 (load! "+jira.el")
 
-;; JS settings
-(load! "+js.el")
-
 ;; flycheck settings
 (load! "+flycheck.el")
 
