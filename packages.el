@@ -70,3 +70,7 @@
 ;; Bring Jira and org-mode together
 ;; https://github.com/ahungry/org-jira
 (package! org-jira)
+
+;; List all flycheck errors in a project
+;; https://github.com/nbfalcon/flycheck-projectile
+(package! flycheck-projectile)
