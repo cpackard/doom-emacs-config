@@ -14,6 +14,9 @@
   ;; Disable electric-mode, which is now respected by Org and which creates some confusing indentation sometimes.
   (add-hook! 'org-mode-hook (electric-indent-local-mode -1))
 
+  ;; Use fixed-pitch font for org tables
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+
   ;; (add-hook! 'org-mode-hook 'doom-docs-mode)
   (custom-theme-set-faces!
     doom-theme
