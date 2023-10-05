@@ -125,6 +125,9 @@
 ;; flycheck settings
 (load! "+flycheck.el")
 
+;; global keybindings
+(load! "+keys.el")
+
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
