@@ -14,8 +14,9 @@
   ;; Disable electric-mode, which is now respected by Org and which creates some confusing indentation sometimes.
   (add-hook! 'org-mode-hook (electric-indent-local-mode -1))
 
-  ;; Use fixed-pitch font for org tables
+  ;; Use fixed-pitch font for org tables and code blocks
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
 
   ;; (add-hook! 'org-mode-hook 'doom-docs-mode)
   (custom-theme-set-faces!
@@ -34,7 +35,7 @@
              #'visual-line-mode
              #'variable-pitch-mode))
 
-    ;; (add-hook! 'org-mode-hook #'mixed-pitch-mode)
-    ;; (add-hook! 'org-mode-hook #'solaire-mode)
+;; (add-hook! 'org-mode-hook #'mixed-pitch-mode)
+;; (add-hook! 'org-mode-hook #'solaire-mode)
 
-    ;; (setq mixed-pitch-variable-pitch-cursor nil)
+;; (setq mixed-pitch-variable-pitch-cursor nil)
