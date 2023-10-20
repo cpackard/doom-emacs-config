@@ -185,6 +185,7 @@
        :desc "apropos" "a" #'cider-apropos
        :desc "cheetsheet" "c" #'cider-cheatsheet
        :desc "clojure docs" "d" #'cider-clojuredocs
+       :desc "cider doc" "h" #'cider-doc
        :desc "javadoc" "j" #'cider-javadoc
        :desc "browse ns" "n" #'cider-browse-ns
        :desc "browse all ns" "N" #'cider-browse-ns-all
