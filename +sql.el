@@ -32,7 +32,15 @@
 (map! :leader
       (:prefix-map ("o" . "open")
                    (:prefix ("s" . "SQL")
-                            :desc "local" "l" #'cp/db-connect-sql-local
-                            :desc "dev" "d" #'cp/db-connect-sql-dev
-                            :desc "prod-ro" "p" #'cp/db-connect-sql-prod-ro
-                            :desc "prod" "P" #'cp/db-connect-sql-pro)))
+                    :desc "local" "l" #'cp/db-connect-sql-local
+                    :desc "dev" "d" #'cp/db-connect-sql-dev
+                    :desc "prod-ro" "p" #'cp/db-connect-sql-prod-ro
+                    :desc "prod" "P" #'cp/db-connect-sql-pro)))
+
+(after! sqlformat
+  ;; Use pg_format for formatting: https://github.com/darold/pgFormatter
+  ;; `-s2` = 2 spaces for indentation
+  ;; `-g` = don't group statements
+  ;; `-u1` = lowercase keywords
+  (setq sqlformat-command 'pgformatter
+        sqlformat-args '("-s2" "-g" "-u1")))

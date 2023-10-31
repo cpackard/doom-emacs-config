@@ -74,3 +74,7 @@
 ;; List all flycheck errors in a project
 ;; https://github.com/nbfalcon/flycheck-projectile
 (package! flycheck-projectile)
+
+;; commands and a minor mode for easily reformatting SQL using external programs such as sqlformat, sqlfluff, pg_format or sql-formatter.
+;; https://github.com/purcell/sqlformat
+(package! sqlformat)
