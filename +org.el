@@ -42,6 +42,15 @@
           (file . find-file-other-window)
           (wl . wl-other-frame))))
 
+(after! org-roam
+  (setq org-roam-directory (expand-file-name "~/cpackard_logseq/"))
+  (setq org-roam-dailies-directory "journals/")
+  (setq org-roam-capture-templates
+        '(("d" "default" plain
+           "%?" :target
+           (file+head "pages/${slug}.org"
+                      "#+title: ${title}\n")
+           :unnarrowed t))))
 
 ;; (add-hook! 'org-mode-hook #'mixed-pitch-mode)
 ;; (add-hook! 'org-mode-hook #'solaire-mode)
