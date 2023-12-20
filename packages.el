@@ -78,3 +78,7 @@
 ;; commands and a minor mode for easily reformatting SQL using external programs such as sqlformat, sqlfluff, pg_format or sql-formatter.
 ;; https://github.com/purcell/sqlformat
 (package! sqlformat)
+
+;; A minor mode that automatically resizes the focused window.
+;; https://github.com/roman/golden-ratio.el
+(package! golden-ratio)
