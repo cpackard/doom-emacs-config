@@ -31,6 +31,22 @@
         ;; list of your email adresses:
         (setq +mu4e-personal-addresses `(,icloud-email ,fastmail-email))
 
+        ;; extend the default bookmark actions
+        (setq mu4e-bookmarks
+              '((:name "Today's Inbox"
+                 :query "date:today..now AND maildir:/fastmail/INBOX"
+                 :key  ?i)
+                (:name "Today's messages"
+                 :query "date:today..now AND NOT (maildir:/fastmail/Archive OR maildir:/gmail/Archive OR maildir:/icloud/Archive)"
+                 :key ?t)
+                (:name "Last 7 days"
+                 :query "date:7d..now"
+                 :hide-unread t
+                 :key ?w)
+                (:name "Flagged messages"
+                 :query "flag:flagged"
+                 :key ?f)))
+
         ;; check your ~/.maildir to see how the subdirectories are called
         ;; for the generic imap account:
         ;; e.g `ls ~/.maildir/example'
