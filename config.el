@@ -139,8 +139,10 @@
 ;; Emacs will assume $HOME is the root of any project living under $HOME. If this
 ;; isn't desired, you will need to remove ".git" from
 ;; `projectile-project-root-files-bottom-up' (a variable)
-(after! projectile (setq projectile-project-root-files-bottom-up (remove ".git"
-                                                                  projectile-project-root-files-bottom-up)))
+(after! projectile
+  (setq projectile-project-root-files-bottom-up
+        (remove ".git"
+                projectile-project-root-files-bottom-up)))
 
 ;; def portal to the dev namespace to allow dereferencing via @dev/portal
 ;; (defun portal.api/open ()
