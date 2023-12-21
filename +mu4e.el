@@ -29,7 +29,7 @@
         (setq mu4e-change-filenames-when-moving t)
 
         ;; list of your email adresses:
-        (setq +mu4e-personal-addresses `(,icloud-email ,fastmail-email))
+        (setq +mu4e-personal-addresses `(,fastmail-email))
 
         ;; extend the default bookmark actions
         (setq mu4e-bookmarks
@@ -51,10 +51,22 @@
         ;; for the generic imap account:
         ;; e.g `ls ~/.maildir/example'
         (setq   mu4e-maildir-shortcuts
-                '(("/icloud/INBOX" . ?i)
-                  ("/icloud/Sent Messages" . ?I)
-                  ("/fastmail/INBOX" . ?f)
-                  ("/fastmail/Sent" . ?F)))
+                '((:maildir "/fastmail/INBOX"
+                   :name "Fastmail inbox"
+                   :key ?f
+                   :hide-unread nil)
+                  (:maildir "/fastmail/Sent"
+                   :name "Fastmail sent"
+                   :key ?F
+                   :hide-unread t)
+                  (:maildir "/icloud/INBOX"
+                   :name "iCloud inbox"
+                   :key ?i
+                   :hide-unread t)
+                  (:maildir "/icloud/Sent"
+                   :name "iCloud sent"
+                   :key ?I
+                   :hide-unread t)))
 
         ;; This controls the account context one is in. Helpful for instance, when composing an email. You can then select the context, which sets at the same time the sender.
         (setq mu4e-contexts
@@ -114,11 +126,12 @@
                                                       (mu4e-drafts-folder . "/gmail/Drafts")
                                                       (mu4e-refile-folder . "/gmail/Archive")
                                                       (mu4e-sent-folder . "/gmail/Sent")
-                                                      (mu4e-trash-folder . "/gmail/Trash"))))))
-              (setq   mu4e-maildir-shortcuts
-                      (append mu4e-maildir-shortcuts
-                              '(("/gmail/INBOX" . ?g)
-                                ("/gmail/Sent" . ?G))))))
+                                                      (mu4e-trash-folder . "/gmail/Trash"))))))))
+        ;; (setq   mu4e-maildir-shortcuts
+        ;;         (append mu4e-maildir-shortcuts
+        ;;                 '(("/gmail/INBOX" . ?g)
+        ;;                   ("/gmail/Sent" . ?G))))
+
 
 
         (setq mu4e-context-policy 'pick-first) ;; start with the first (default) context;
@@ -160,8 +173,8 @@
                              (message-fetch-field "from")))
                      (account
                       (cond
-                       ((string-match icloud-email from) "icloud")
                        ((string-match fastmail-email from) "fastmail")
+                       ((string-match icloud-email from) "icloud")
                        ((string-match gmail-email from) "gmail"))))
                   (setq message-sendmail-extra-arguments (list '"-a" account))))))
 
