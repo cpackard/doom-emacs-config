@@ -205,6 +205,8 @@
 
 ;; Rust
 (after! rust-mode
+  (add-hook 'rust-mode-hook 'lsp-inlay-hints-mode)
+
   (setq lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
   (setq lsp-rust-analyzer-display-chaining-hints t)
   (setq lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
