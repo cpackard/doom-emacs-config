@@ -203,22 +203,26 @@
   ;; Hack for Emacs 29.1
   (fset 'epg-wait-for-status 'ignore))
 
-;; Rust
-(after! rust-mode
-  (add-hook 'rust-mode-hook 'lsp-inlay-hints-mode)
-
-  (setq lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
-  (setq lsp-rust-analyzer-display-chaining-hints t)
-  (setq lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
-  (setq lsp-rust-analyzer-display-closure-return-type-hints t)
-  (setq lsp-rust-analyzer-display-parameter-hints nil)
-  (setq lsp-rust-analyzer-display-reborrow-hints nil))
-
-;; LSP UI
-(after! lsp
-  (setq lsp-inlay-hint-enable t)
-  (setq lsp-ui-peek-always-show t)
-  (setq lsp-ui-sideline-show-hover t))
+(use-package! lsp-mode
+  :defer t
+  ;; :after-call pre-command-hook
+  :config
+  (setq
+   ;; General settings
+   lsp-inlay-hint-enable t
+   lsp-ui-peek-always-show t
+   lsp-ui-sideline-show-hover t
+   lsp-auto-guess-root nil
+   ;; Rust settings
+   lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial"
+   lsp-rust-analyzer-display-chaining-hints t
+   lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil
+   lsp-rust-analyzer-display-closure-return-type-hints t
+   lsp-rust-analyzer-display-parameter-hints nil
+   lsp-rust-analyzer-display-reborrow-hints nil
+   )
+  (add-hook 'rust-mode-hook #'lsp-inlay-hints-mode)
+  )
 
 ;; Golden Ratio
 ;; https://github.com/doomemacs/doomemacs/issues/2225#issuecomment-568287835
