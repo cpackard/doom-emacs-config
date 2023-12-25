@@ -40,7 +40,7 @@
                  :query "date:today..now AND NOT (maildir:/fastmail/Archive OR maildir:/gmail/Archive OR maildir:/icloud/Archive)"
                  :key ?t)
                 (:name "Last 7 days"
-                 :query "date:7d..now"
+                 :query "date:7d..now AND NOT (maildir:/fastmail/Archive OR maildir:/gmail/Archive OR maildir:/icloud/Archive OR maildir:/fastmail/Spam)"
                  :hide-unread t
                  :key ?w)
                 (:name "Flagged messages"
