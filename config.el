@@ -243,21 +243,11 @@
 (use-package! dap-mode
   :defer t
   :config
-  ;; (require 'dap-codelldb)
   (require 'dap-lldb)
   (require 'dap-cpptools)
   (require 'dap-gdb-lldb)
   ;; installs .extension/vscode
-  ;; (dap-codelldb-setup)
   (dap-gdb-lldb-setup)
-  ;; (setq lsp-rust-analyzer-debug-lens-extra-dap-args
-  ;;       '(:MIMode "gdb"
-  ;;         :miDebuggerPath "rust-gdb"
-  ;;         :stopAtEntry t
-  ;;         :externalConsole :json-false
-  ;;         :setupCommands [#s(hash-table size 12 data
-  ;;                                       ("description" "Enable pretty-printing for gdb" "text" "-enable-pretty-printing" "ignoreFailures" t))]
-  ;;         ))
 
   (dap-register-debug-template
    "Rust::LLDB Run Configuration"
@@ -273,49 +263,7 @@
          :valuesFormatting "parseText"
          :dap-compilation "cargo build"
          :dap-compilation-dir "/Users/cpackard/Documents/rust_book/hello_cargo"
-         ))
-
-  ;; (dap-register-debug-template
-  ;;  "Rust::GDB Run Configuration"
-  ;;  (list :type "gdb"
-  ;;        :request "launch"
-  ;;        :name "GDB::Run"
-  ;;        :gdbpath "rust-gdb"
-  ;;        :target "${workspaceRoot}/target/debug/${workspaceRootFolderName}.exe"
-  ;;        :cwd "${workspaceRoot}"
-  ;;        :valuesFormatting "prettyPrinters"))
-
-  ;; (dap-register-debug-template "Rust::LLDB Run Configuration"
-  ;;                              (list :type "lldb"
-  ;;                                    :request "launch"
-  ;;                                    :name "LLDB::Run"
-  ;;                                    :gdbpath "rust-lldb"
-  ;;                                    :target nil
-  ;;                                    :cwd nil
-  ;;                                    :env '(("RUST_BACKTRACE" . "full"))
-  ;;                                    :args nil
-  ;;                                    :sourceLanguages '("rust"))
-
-  ;;                              )
-  )
-
-;; (dap-register-debug-template "Rust::GDB Run Configuration"
-;;                              (list :type "gdb"
-;;                                    :request "launch"
-;;                                    :name "GDB::Run"
-;;                                    :gdbpath "rust-gdb"
-;;                                    :target nil
-;;                                    :cwd nil))
-
-;; (dap-register-debug-template
-;;  "Rust::LLDB Run Configuration"
-;;  (list :type "lldb"
-;;        :request "launch"
-;;        :name "LLDB::Run"
-;;        :gdbpath "rust-lldb"
-;;        ;; :miDebuggerPath "~/.cargo/bin/rust-lldb"
-;;        :target nil
-;;        :cwd nil))
+         )))
 
 (defun extract-substring-from-url (input-url regex)
   "Extract the substring based on the given regex pattern."
