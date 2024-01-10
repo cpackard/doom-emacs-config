@@ -106,7 +106,7 @@
        :desc "whitespace" "w" #'delete-trailing-whitespace))
 
 ;; Mac OS settings
-(setq mac-right-control-modifier 'meta)
+(setq mac-right-control-modifier 'none)
 (setq mac-right-option-modifier 'meta)
 
 ;; Map `M-<backspace>` to `backward-kill-word` like mac os.
