@@ -20,9 +20,8 @@
 ;;
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
-
-(setq doom-font (font-spec :family "Fira Code" :size 14)
-      doom-big-font (font-spec :family "Fira Code" :size 20)
+(setq doom-font (font-spec :family "IBM Plex Mono" :size 15)
+      doom-big-font (font-spec :family "IBM Plex Mono" :size 20)
       doom-variable-pitch-font (font-spec :family "ETBembo" :size 16))
 
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
@@ -109,7 +108,7 @@
 (load! "+fennel.el")
 
 ;; Org mode bindings
-(load! "+org.el")
+;; (load! "+org.el")
 
 ;; mu4e bindings
 (load! "+mu4e.el")
@@ -121,7 +120,7 @@
 (load! "+sql.el")
 
 ;; Jira settings
-(load! "+jira.el")
+;; (load! "+jira.el")
 
 ;; flycheck settings
 (load! "+flycheck.el")
@@ -131,6 +130,12 @@
 
 ;; copilot settings
 (load! "+copilot.el")
+
+;; rust settings
+(load! "+rust.el")
+
+;; golden-ratio
+(load! "+golden-ratio.el")
 
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
@@ -145,58 +150,12 @@
         (remove ".git"
                 projectile-project-root-files-bottom-up)))
 
-;; def portal to the dev namespace to allow dereferencing via @dev/portal
-;; (defun portal.api/open ()
-;;   (interactive)
-;;   (cider-nrepl-sync-request:eval
-;;     "(do (ns dev)
-;;          (def portal ((requiring-resolve 'portal.api/open) {:launcher :emacs}))
-;;          (add-tap (requiring-resolve 'portal.api/submit)))"))
-
-;; (defun portal.api/clear ()
-;;   (interactive)
-;;   (cider-nrepl-sync-request:eval "(portal.api/clear)"))
-
-;; (defun portal.api/close ()
-;;   (interactive)
-;;   (cider-nrepl-sync-request:eval "(portal.api/close)"))
-
 (+global-word-wrap-mode t)
-
-;; By default, =[= and =]= are [[https://github.com/noctuid/lispyville/tree/master#additional-movement-key-theme][bound]] to =lispyville-previous-opening= and
-;; =lispyville-next-closing= respectively. If you use a language which makes frequent
-;; use of brackets (e.g. Clojure, Racket, Scheme), you can insert a bracket pair =[]=
-;; by typing ={=. If you prefer to use the bracket keys for input, you can rebind
-;; them like below:
-(map! :after (lispy lispyville)
-      :map lispy-mode-map-lispy
-      ;; unbind individual bracket keys
-      "[" nil
-      "]" nil
-      ;; re-bind commands bound to bracket keys by default
-      "M-[" #'lispyville-previous-opening
-      "M-]" #'lispyville.next-opening)
-
-(map! :after evil
-      :niv "M-n" #'evil-pop-paste-next
-      :niv "M-p" #'evil-paste-pop
-      :niv "C-n" #'evil-next-line
-      :niv "C-p" #'evil-previous-line
-      :nv  "C-'" #'comment-dwim)
 
 ;; Rebind C-v to scroll-up command to mimic expected Emacs functionality
 ;; of C-v / M-v for scrolling the page up and down respectively.
-(map! :map vertico-map
-      :g "C-v" #'vertico-scroll-up)
-
-;; Github Copilot
-(use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("<tab>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<tab>" . 'copilot-accept-completion-by-word)))
+;; (map! :map vertico-map
+;;       :g "C-v" #'vertico-scroll-up)
 
 ;; GPG
 (after! epa
@@ -204,127 +163,6 @@
   ;; Hack for Emacs 29.1
   (fset 'epg-wait-for-status 'ignore))
 
-(use-package! lsp-mode
-  :defer t
-  ;; :after-call pre-command-hook
-  :config
-  (setq
-   ;; General settings
-   lsp-inlay-hint-enable t
-   lsp-ui-peek-always-show t
-   lsp-ui-sideline-show-hover t
-   lsp-auto-guess-root nil
-   ;; Rust settings
-   lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial"
-   lsp-rust-analyzer-display-chaining-hints t
-   lsp-rust-analyzer-cargo-watch-command "clippy"
-   lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil
-   lsp-rust-analyzer-display-closure-return-type-hints t
-   lsp-rust-analyzer-display-parameter-hints nil
-   lsp-rust-analyzer-display-reborrow-hints nil)
+(after! tree-sitter
+  (set-face-attribute 'tree-sitter-hl-face:function.call nil :weight 'semi-bold))
 
-  (lsp-register-custom-settings
-   '(("rust-analyzer.experimental.localDocs" t t)))
-
-  (add-hook 'rust-mode-hook #'lsp-inlay-hints-mode))
-
-
-;; Golden Ratio
-;; https://github.com/doomemacs/doomemacs/issues/2225#issuecomment-568287835
-(use-package! golden-ratio
-  :after-call pre-command-hook
-  :config
-  (golden-ratio-mode 1)
-  ;; Using this hook for resizing windows is less precise than
-  ;; `doom-switch-window-hook'.
-  (remove-hook 'window-configuration-change-hook #'golden-ratio)
-  (add-hook 'doom-switch-window-hook #'golden-ratio))
-
-(use-package! dap-mode
-  :defer t
-  :config
-  (require 'dap-lldb)
-  (require 'dap-cpptools)
-  (require 'dap-gdb-lldb)
-  ;; installs .extension/vscode
-  (dap-gdb-lldb-setup)
-
-  (dap-register-debug-template
-   "Rust::LLDB Run Configuration"
-   (list :type "lldb-mi"
-         :request "launch"
-         :name "LLDB::Run"
-         :gdbpath "rust-lldb"
-         :console "external"
-         ;; :target "${workspaceRoot}/target/debug/${workspaceRootFolderName}"
-         :target "/Users/cpackard/Documents/rust_book/hello_cargo/target/debug/hello_cargo"
-         ;; :cwd "${workspaceRoot}"
-         :cwd "/Users/cpackard/Documents/rust_book/hello_cargo"
-         :valuesFormatting "parseText"
-         :dap-compilation "cargo build"
-         :dap-compilation-dir "/Users/cpackard/Documents/rust_book/hello_cargo"
-         )))
-
-(defun extract-substring-from-url (input-url regex)
-  "Extract the substring based on the given regex pattern."
-  (when (string-match regex input-url)
-    (match-string 1 input-url)))
-
-(setq rustc-sysroot
-      (let ((sysroot (string-trim-right (shell-command-to-string "rustc --print sysroot"))))
-        (format "%s/share/doc/rust/html" sysroot)))
-
-;; (open-rust-doc-url "https://doc.rust-lang.org/stable/alloc/string/struct.String.html")
-;; (open-rust-doc-url "https://docs.rs/forecast/0.1.0/forecast/struct.Hourly.html")
-(defun open-rust-doc-url (&optional rust-doc-url)
-  "Open the Rust documentation URL in the browser."
-  (interactive)
-  (let* ((doc-url (or rust-doc-url
-                      ;; shamelessly stolen from `lsp-rust-analyzer-open-external-docs`
-                      (-if-let* ((params (lsp-make-rust-analyzer-open-external-docs-params
-                                          :text-document (lsp--text-document-identifier)
-                                          :position (lsp--cur-position)))
-                                 (url (lsp-request "experimental/externalDocs" params)))
-                          url
-                        nil))))
-    (if doc-url
-        (let* ((package-crate-regex "https://docs\\.rs/[^/]+/[0-9]+\\.[0-9]+\\.[0-9]+/\\(.*\\)")
-               (stdlib-docs-regex "https://doc\\.rust-lang\\.org/[^/]+/\\(.*\\)")
-               (is-package-crate (string-match package-crate-regex doc-url))
-               (url-regex (if is-package-crate
-                              package-crate-regex
-                            stdlib-docs-regex))
-
-               (url-suffix (extract-substring-from-url doc-url url-regex))
-
-               (url-prefix (format "file://%s" (if is-package-crate
-                                                   (format "%s/target/doc" (projectile-project-root))
-                                                 rustc-sysroot)))
-               (url-prefix (if (string-suffix-p "/" url-prefix)
-                               (substring url-prefix 0 (- (length url-prefix) 1))
-                             url-prefix))
-
-               (full-url (format "%s/%s" url-prefix url-suffix)))
-          (+evil-window-vsplit-a)
-          (let ((docs-win (selected-window)))
-            (xwidget-webkit-browse-url full-url)
-            (set-window-buffer docs-win xwidget-webkit-last-session-buffer)
-            (set-window-dedicated-p docs-win t) ; Make the window dedicated to the buffer
-            (set (make-local-variable 'kill-buffer-hook)
-                 (lambda ()
-                   (let ((win (get-buffer-window docs-buffer)))
-                     (when win (delete-window win)))))))
-      (lsp--warn "Couldn't find documentation URL or your version of rust-analyzer doesn't support this extension"))))
-
-(map! :after rustic
-      :map rustic-mode-map
-      :leader
-      (:prefix ("c" . "code")
-       :desc "Jump to browser docs" "K" #'open-rust-doc-url))
-
-(map! :after rustic
-      :map rustic-mode-map
-      :localleader
-      (:prefix ("h" . "help")
-       :desc "Jump to documentation" "h" #'+lookup/documentation
-       :desc "Jump to browser docs" "b" #'open-rust-doc-url))

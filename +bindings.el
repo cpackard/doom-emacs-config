@@ -8,14 +8,12 @@
 ;; (map! :after evil
 ;;       :map evil-normal-state-map
 ;;       "/" #'+default/search-buffer)
-
 ;; ------------------------------------------------
 ;; Key binding vars
-
 ;; fd as Esc key binding
 ;; https://discourse.doomemacs.org/t/typing-jk-deletes-j-and-returns-to-normal-mode/59/7
 (after! evil-escape
-  (setq evil-escape-key-sequence "tn"))
+  (setq evil-escape-key-sequence "ht"))
 
 ;; https://discourse.doomemacs.org/t/what-are-leader-and-localleader-keys/153
 ;; Doom Defaults: `SPC' leader key, `SPC m' local leader
@@ -106,12 +104,33 @@
        :desc "whitespace" "w" #'delete-trailing-whitespace))
 
 ;; Mac OS settings
-(setq mac-right-control-modifier 'none)
-(setq mac-right-option-modifier 'meta)
+(setq mac-right-control-modifier 'control)
+(setq mac-right-option-modifier 'control)
 
 ;; Map `M-<backspace>` to `backward-kill-word` like mac os.
 (unbind-key "DEL" evil-normal-state-map)
 (map! "M-<backspace>" #'backward-kill-word)
+
+;; By default, =[= and =]= are [[https://github.com/noctuid/lispyville/tree/master#additional-movement-key-theme][bound]] to =lispyville-previous-opening= and
+;; =lispyville-next-closing= respectively. If you use a language which makes frequent
+;; use of brackets (e.g. Clojure, Racket, Scheme), you can insert a bracket pair =[]=
+;; by typing ={=. If you prefer to use the bracket keys for input, you can rebind
+;; them like below:
+(map! :after (lispy lispyville)
+      :map lispy-mode-map-lispy
+      ;; unbind individual bracket keys
+      "[" nil
+      "]" nil
+      ;; re-bind commands bound to bracket keys by default
+      "M-[" #'lispyville-previous-opening
+      "M-]" #'lispyville.next-opening)
+
+(map! :after evil
+      :niv "M-n" #'evil-pop-paste-next
+      :niv "M-p" #'evil-paste-pop
+      :niv "C-n" #'evil-next-line
+      :niv "C-p" #'evil-previous-line
+      :nv  "C-'" #'comment-dwim)
 
 ;; ------------------------------------------------
 ;; Experiments
