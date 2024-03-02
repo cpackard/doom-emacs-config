@@ -105,7 +105,7 @@
 
 ;; Mac OS settings
 (setq mac-right-control-modifier 'control)
-(setq mac-right-option-modifier 'control)
+(setq mac-right-option-modifier 'meta)
 
 ;; Map `M-<backspace>` to `backward-kill-word` like mac os.
 (unbind-key "DEL" evil-normal-state-map)
