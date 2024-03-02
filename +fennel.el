@@ -4,13 +4,61 @@
   (interactive)
   (fennel-proto-repl "love ."))
 
+(defun fnl-lsp-config ()
+  "Update the fennel-ls configuration."
+  (interactive)
+  (lsp-notify "workspace/didChangeConfiguration"
+              (list :settings
+                    (list :fennel-ls
+                          (list :extra-globals "love love.graphics"
+                                :checks (list :unused-definition t
+                                              :unnecessary-method t
+                                              :bad-unpack t
+                                              :var-never-set t
+                                              :op-with-no-arguments t
+                                              :unknown-module-field json-false)))))
+  (message "fennel-ls config updated"))
+
+(defun reopen-buffer-file ()
+  "Kill the current buffer and reopen the file it is visiting."
+  (interactive) ; Make the function callable via M-x and keybindings.
+  (let ((file-name (buffer-file-name)))
+    (if file-name
+        (progn
+          (kill-buffer)
+          (find-file file-name))
+      (message "Buffer is not visiting a file!"))))
+
 (after! fennel-mode
   (map! :after fennel-mode
+        :map fennel-mode-map
         :localleader
-        :prefix ("r" . "repl")
-        :desc "base repl" "s" #'fennel-repl
-        :desc "proto repl" "p" #'fennel-proto-repl
-        :desc "LÖVE repl" "l" #'fennel-love-2d-repl))
+        (:prefix ("b" . "buffer")
+         :desc "reopen buffer file" "r" #'reopen-buffer-file)
+        (:prefix ("=" . "format")
+         :desc "format buffer" "=" #'fennel-format
+         :desc "format region" "r" #'fennel-format-region)
+        (:prefix ("l" . "lsp")
+         :desc "update lsp config" "c" #'fnl-lsp-config)
+        (:prefix ("r" . "repl")
+         :desc "comma command" "," #'fennel-proto-repl-comma-command
+         :desc "interrupt repl" "i" #'fennel-proto-repl-interrupt
+         :desc "LÖVE repl" "l" #'fennel-love-2d-repl
+         :desc "macro expand" "m" #'fennel-proto-repl-macroexpand
+         :desc "proto repl" "p" #'fennel-proto-repl
+         :desc "reload file" "r" #'fennel-proto-repl-reload
+         :desc "base repl" "s" #'fennel-repl
+         (:prefix ("e" . "eval")
+          :desc "eval buffer" "b" #'fennel-proto-repl-eval-buffer
+          :desc "eval last sexp" "e" #'fennel-proto-repl-eval-last-sexp
+          :desc "eval defun" "f" #'fennel-proto-repl-eval-defun
+          :desc "eval last & next" "n" #'fennel-proto-repl-eval-form-and-next
+          :desc "eval current form" "p" #'fennel-proto-repl-eval-print-last-sexp
+          :desc "eval region" "r" #'fennel-proto-repl-eval-region)
+         (:prefix ("h" . "help")
+          :desc "show args" "a" #'fennel-proto-repl-show-arglist
+          :desc "show docs" "d" #'fennel-proto-repl-show-documentation
+          :desc "show var docs" "v" #'fennel-proto-repl-show-var-documentation))))
 
 (after! (:and lsp-mode fennel-mode)
   (add-to-list 'lsp-language-id-configuration
