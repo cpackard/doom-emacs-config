@@ -11,8 +11,10 @@
   :config
   (setq custom--clojure-indent-basic 0)
   (setq custom--elisp-indent-basic 0)
+  (setq custom--fennel-indent-basic 0)
   (add-to-list 'copilot-indentation-alist '(clojure-mode custom--clojure-indent-basic))
-  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode custom--elisp-indent-basic)))
+  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode custom--elisp-indent-basic))
+  (add-to-list 'copilot-indentation-alist '(fennel-mode custom--fennel-indent-basic)))
 
 ;; A company front-end with icons.
 ;; https://github.com/sebastiencs/company-box
