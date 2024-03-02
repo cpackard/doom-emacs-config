@@ -137,6 +137,9 @@
 ;; golden-ratio
 (load! "+golden-ratio.el")
 
+;; IRC settings
+(load! "+irc.el")
+
 ;; NOTE: cpackard added these 05/22/2023
 (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
