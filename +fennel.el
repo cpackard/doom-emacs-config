@@ -2,7 +2,48 @@
 
 (defun fennel-love-2d-repl ()
   (interactive)
+  (setenv "LOVE_DEBUG" nil)
   (fennel-proto-repl "love ."))
+
+(defun fennel-love-2d-repl-debug ()
+  (interactive)
+  (setenv "LOVE_DEBUG" "1")
+  (fennel-proto-repl "love . --debug"))
+
+(defun file-to-module ()
+  "Convert a fennel filename to module format."
+  (let* ((fennel-filename (file-relative-name (buffer-file-name) (doom-project-root)))
+         (replaced (replace-regexp-in-string "/" "." fennel-filename)))
+    (if (string-suffix-p ".fnl" replaced)
+        (substring replaced 0 (- (length replaced) 4))
+      replaced)))
+
+(defvar last-fennel-test nil)
+
+(defun fennel-test-module ()
+  "Test the current fennel module."
+  (interactive)
+  (setenv "LOVE_DEBUG" "1")
+  (let ((test-command (format "cd %s && love . --test %s" (doom-project-root) (file-to-module))))
+    (setq last-fennel-test test-command)
+    (compile test-command)))
+
+(defun fennel-test-last ()
+  "Re-run the previous fennel test."
+  (interactive)
+  (setenv "LOVE_DEBUG" "1")
+  (compile last-fennel-test))
+
+(defun fennel-test-all ()
+  "Run all tests for the current project."
+  (interactive)
+  (setenv "LOVE_DEBUG" nil)
+  (compile (format "cd %s && love . --test" (doom-project-root))))
+
+(defun fennel-love-2d-base-repl ()
+  (interactive)
+  (setenv "LOVE_DEBUG" nil)
+  (fennel-repl "love ."))
 
 (defun fnl-lsp-config ()
   "Update the fennel-ls configuration."
@@ -42,6 +83,7 @@
          :desc "update lsp config" "c" #'fnl-lsp-config)
         (:prefix ("r" . "repl")
          :desc "comma command" "," #'fennel-proto-repl-comma-command
+         :desc "develop repl" "d" #'fennel-love-2d-repl-debug
          :desc "interrupt repl" "i" #'fennel-proto-repl-interrupt
          :desc "LÖVE repl" "l" #'fennel-love-2d-repl
          :desc "macro expand" "m" #'fennel-proto-repl-macroexpand
@@ -58,7 +100,11 @@
          (:prefix ("h" . "help")
           :desc "show args" "a" #'fennel-proto-repl-show-arglist
           :desc "show docs" "d" #'fennel-proto-repl-show-documentation
-          :desc "show var docs" "v" #'fennel-proto-repl-show-var-documentation))))
+          :desc "show var docs" "v" #'fennel-proto-repl-show-var-documentation))
+        (:prefix ("t" . "test")
+         :desc "all" "a" #'fennel-test-all
+         :desc "rerun" "r" #'fennel-test-last
+         :desc "module" "t" #'fennel-test-module)))
 
 (after! (:and lsp-mode fennel-mode)
   (add-to-list 'lsp-language-id-configuration
