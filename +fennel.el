@@ -3,12 +3,14 @@
 (defun fennel-love-2d-repl ()
   (interactive)
   (setenv "LOVE_DEBUG" nil)
-  (fennel-proto-repl "love ."))
+  (let ((default-directory (doom-project-root)))
+    (fennel-proto-repl "love .")))
 
 (defun fennel-love-2d-repl-debug ()
   (interactive)
   (setenv "LOVE_DEBUG" "1")
-  (fennel-proto-repl "love . --debug"))
+  (let ((default-directory (doom-project-root)))
+    (fennel-proto-repl "love . --debug")))
 
 (defun file-to-module ()
   "Convert a fennel filename to module format."
@@ -43,7 +45,8 @@
 (defun fennel-love-2d-base-repl ()
   (interactive)
   (setenv "LOVE_DEBUG" nil)
-  (fennel-repl "love ."))
+  (let ((default-directory (doom-project-root)))
+    (fennel-repl "love .")))
 
 (defun fnl-lsp-config ()
   "Update the fennel-ls configuration."
