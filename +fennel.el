@@ -109,6 +109,13 @@
          :desc "rerun" "r" #'fennel-test-last
          :desc "module" "t" #'fennel-test-module)))
 
+(defun nil-hash ()
+  (interactive)
+  (insert "#"))
+
+(with-eval-after-load 'lispy
+  (lispy-define-key lispy-mode-map "#" 'nil-hash))
+
 (after! (:and lsp-mode fennel-mode)
   (add-to-list 'lsp-language-id-configuration
                '(fennel-mode . "fennel"))
