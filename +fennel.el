@@ -114,7 +114,9 @@
   (insert "#"))
 
 (with-eval-after-load 'lispy
-  (lispy-define-key lispy-mode-map "#" 'nil-hash))
+  (lispy-define-key lispy-mode-map "#" 'nil-hash)
+  (setq lispy-parens-preceding-syntax-alist
+        (append lispy-parens-preceding-syntax-alist '((fennel-mode "[#`',.@]+")))))
 
 (after! (:and lsp-mode fennel-mode)
   (add-to-list 'lsp-language-id-configuration
