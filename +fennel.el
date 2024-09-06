@@ -48,6 +48,11 @@
   (let ((default-directory (doom-project-root)))
     (fennel-repl "love .")))
 
+(defun fennel-link-project-proto-repl ()
+  (interactive)
+  (fennel-proto-repl-link-project-buffer))
+
+;; lsp-register-custom-settings
 (defun fnl-lsp-config ()
   "Update the fennel-ls configuration."
   (interactive)
@@ -55,17 +60,29 @@
               (list :settings
                     (list :fennel-ls
                           (list :extra-globals "love love.graphics"
+                                :version "lua51"
                                 :checks (list :unused-definition t
                                               :unnecessary-method t
                                               :bad-unpack t
                                               :var-never-set t
                                               :op-with-no-arguments t
-                                              :unknown-module-field json-false)))))
+                                              ;; :unknown-module-field json-false
+                                              :unknown-module-field t)))))
   (message "fennel-ls config updated"))
+
+(defun my/fnl-lsp-config ()
+  "Set the default LSP config for Fennel buffers."
+  (when (eq major-mode 'fennel-mode)
+    (lsp-register-custom-settings '(("fennel-ls.version" "lua51" nil)
+                                    ("fennel-ls.extra-globals" "love" nil)))))
+
+;; (add-hook 'lsp-before-initialize-hook 'my/fnl-lsp-config)
+(add-hook 'lsp-after-initialize-hook 'fnl-lsp-config)
+
 
 (defun reopen-buffer-file ()
   "Kill the current buffer and reopen the file it is visiting."
-  (interactive) ; Make the function callable via M-x and keybindings.
+  (interactive)            ; Make the function callable via M-x and keybindings.
   (let ((file-name (buffer-file-name)))
     (if file-name
         (progn
@@ -93,6 +110,7 @@
          :desc "proto repl" "p" #'fennel-proto-repl
          :desc "reload file" "r" #'fennel-proto-repl-reload
          :desc "base repl" "s" #'fennel-repl
+         :desc "join project repl" "z" #'fennel-proto-repl-link-project-buffer
          (:prefix ("e" . "eval")
           :desc "eval buffer" "b" #'fennel-proto-repl-eval-buffer
           :desc "eval last sexp" "e" #'fennel-proto-repl-eval-last-sexp
@@ -108,6 +126,17 @@
          :desc "all" "a" #'fennel-test-all
          :desc "rerun" "r" #'fennel-test-last
          :desc "module" "t" #'fennel-test-module)))
+
+(defun my/outline-tab-behavior ()
+  "Custom tab behavior for lines starting with `;;;`."
+  (interactive)
+  (message "running tab-behavior")
+  (if (and (bound-and-true-p outline-minor-mode) ;; Check if outline-minor-mode is active
+           (save-excursion
+             (beginning-of-line)
+             (looking-at-p "^;;;"))) ;; Check if line starts with three semicolons
+      (outline-cycle)
+    (evil-jump-item)))
 
 (defun nil-hash ()
   (interactive)
@@ -127,4 +156,11 @@
                     :activation-fn (lsp-activate-on "fennel")
                     :server-id 'fennel-ls))
 
-  (add-hook 'fennel-mode-hook #'lsp))
+  (add-hook 'fennel-mode-hook #'lsp)
+  (add-hook 'fennel-mode-hook 'outline-minor-mode)
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "<tab>") nil)
+    (define-key evil-motion-state-map (kbd "<tab>") nil)
+    (evil-define-key 'normal outline-minor-mode-map (kbd "<tab>") #'my/outline-tab-behavior)
+    (evil-define-key 'motion outline-minor-mode-map (kbd "<tab>") #'my/outline-tab-behavior)))
+
