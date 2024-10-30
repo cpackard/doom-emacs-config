@@ -6,11 +6,17 @@
   (let ((default-directory (doom-project-root)))
     (fennel-proto-repl "love .")))
 
+(defun fennel-love-2d-base-repl ()
+  (interactive)
+  (setenv "LOVE_DEBUG" nil)
+  (let ((default-directory (doom-project-root)))
+    (fennel-repl "love .")))
+
 (defun fennel-love-2d-repl-debug ()
   (interactive)
   (setenv "LOVE_DEBUG" "1")
   (let ((default-directory (doom-project-root)))
-    (fennel-proto-repl "love . --debug")))
+    (fennel-repl "love . --debug")))
 
 (defun file-to-module ()
   "Convert a fennel filename to module format."
@@ -52,34 +58,6 @@
   (interactive)
   (fennel-proto-repl-link-project-buffer))
 
-;; lsp-register-custom-settings
-(defun fnl-lsp-config ()
-  "Update the fennel-ls configuration."
-  (interactive)
-  (lsp-notify "workspace/didChangeConfiguration"
-              (list :settings
-                    (list :fennel-ls
-                          (list :extra-globals "love love.graphics"
-                                :version "lua51"
-                                :checks (list :unused-definition t
-                                              :unnecessary-method t
-                                              :bad-unpack t
-                                              :var-never-set t
-                                              :op-with-no-arguments t
-                                              ;; :unknown-module-field json-false
-                                              :unknown-module-field t)))))
-  (message "fennel-ls config updated"))
-
-(defun my/fnl-lsp-config ()
-  "Set the default LSP config for Fennel buffers."
-  (when (eq major-mode 'fennel-mode)
-    (lsp-register-custom-settings '(("fennel-ls.version" "lua51" nil)
-                                    ("fennel-ls.extra-globals" "love" nil)))))
-
-;; (add-hook 'lsp-before-initialize-hook 'my/fnl-lsp-config)
-(add-hook 'lsp-after-initialize-hook 'fnl-lsp-config)
-
-
 (defun reopen-buffer-file ()
   "Kill the current buffer and reopen the file it is visiting."
   (interactive)            ; Make the function callable via M-x and keybindings.
@@ -99,16 +77,17 @@
         (:prefix ("=" . "format")
          :desc "format buffer" "=" #'fennel-format
          :desc "format region" "r" #'fennel-format-region)
-        (:prefix ("l" . "lsp")
-         :desc "update lsp config" "c" #'fnl-lsp-config)
+        ;; (:prefix ("l" . "lsp")
+        ;;  :desc "update lsp config" "c" #'fnl-lsp-config)
         (:prefix ("r" . "repl")
          :desc "comma command" "," #'fennel-proto-repl-comma-command
          :desc "develop repl" "d" #'fennel-love-2d-repl-debug
          :desc "interrupt repl" "i" #'fennel-proto-repl-interrupt
          :desc "LÖVE repl" "l" #'fennel-love-2d-repl
+         :desc "LÖVE base repl" "L" #'fennel-love-2d-base-repl
          :desc "macro expand" "m" #'fennel-proto-repl-macroexpand
          :desc "proto repl" "p" #'fennel-proto-repl
-         :desc "reload file" "r" #'fennel-proto-repl-reload
+         :desc "reload file" "r" #'fennel-reload
          :desc "base repl" "s" #'fennel-repl
          :desc "join project repl" "z" #'fennel-proto-repl-link-project-buffer
          (:prefix ("e" . "eval")
