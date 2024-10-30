@@ -119,32 +119,32 @@
 
 ;;; Highlight docstring words surrounded by backticks.
 
-;; (defface fennel-docstring-backtick-face
-;;   '((t :foreground "dark cyan"))  ;; Choose your color
-;;   "Face for highlighting backtick-surrounded words in Fennel docstrings."
-;;   :group 'fennel)
+(defface fennel-docstring-backtick-face
+  '((t :foreground "dark cyan"))  ;; Choose your color
+  "Face for highlighting backtick-surrounded words in Fennel docstrings."
+  :group 'fennel)
 
 ;; highlights docstring words surrounded with backticks
-;; (defun fennel-font-lock-extend-docstrings ()
-;;   (font-lock-add-keywords
-;;    nil
-;;    '(("`\\([^`]+\\)`" 1 'fennel-docstring-backtick-face prepend))))
+(defun fennel-font-lock-extend-docstrings ()
+  (font-lock-add-keywords
+   nil
+   '(("`\\([^`]+\\)`" 1 'fennel-docstring-backtick-face prepend))))
 
-;; (add-hook 'fennel-mode-hook #'fennel-font-lock-extend-docstrings)
+(add-hook 'fennel-mode-hook #'fennel-font-lock-extend-docstrings)
 
 ;;; Highlight docstring words starting with a backtick and ending in a single quote.
 
-(defface fennel-docstring-backtick-single-quote-face
-  '((t :foreground "dark cyan"))  ;; You can choose a different color if needed
-  "Face for highlighting words starting with a backtick and ending with a single quote in Fennel docstrings."
-  :group 'fennel)
+;; (defface fennel-docstring-backtick-single-quote-face
+;;   '((t :foreground "dark cyan"))  ;; You can choose a different color if needed
+;;   "Face for highlighting words starting with a backtick and ending with a single quote in Fennel docstrings."
+;;   :group 'fennel)
 
-(defun fennel-font-lock-extend-docstrings-backtick-single-quote ()
-  (font-lock-add-keywords
-   nil
-   '(("`\\([^']+\\)'" 1 'fennel-docstring-backtick-single-quote-face prepend))))
+;; (defun fennel-font-lock-extend-docstrings-backtick-single-quote ()
+;;   (font-lock-add-keywords
+;;    nil
+;;    '(("`\\([^']+\\)'" 1 'fennel-docstring-backtick-single-quote-face prepend))))
 
-(add-hook 'fennel-mode-hook #'fennel-font-lock-extend-docstrings-backtick-single-quote)
+;; (add-hook 'fennel-mode-hook #'fennel-font-lock-extend-docstrings-backtick-single-quote)
 
 (defun nil-hash ()
   (interactive)
