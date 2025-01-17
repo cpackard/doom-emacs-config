@@ -129,13 +129,40 @@
   "Face for highlighting backtick-surrounded words in Fennel docstrings."
   :group 'fennel)
 
-;; highlights docstring words surrounded with backticks
-(defun fennel-font-lock-extend-docstrings ()
+(defun highlight-backticks-in-quotes ()
+  "Highlight words surrounded by backticks within double-quoted strings."
   (font-lock-add-keywords
    nil
-   '(("`\\([^`]+\\)`" 1 'fennel-docstring-backtick-face prepend))))
+   '(("\".*?\""
+      (0 (let ((start (match-beginning 0))
+               (end (match-end 0)))
+           (save-excursion
+             (goto-char start)
+             (while (re-search-forward "`[^`]+`" end t)
+               (add-text-properties
+                (match-beginning 0) (match-end 0)
+                '(face fennel-docstring-backtick-face))))
+           nil)))
+     (";+.*?`[^`]+`"
+      (0 (let ((start (match-beginning 0))
+               (end (match-end 0)))
+           (save-excursion
+             (goto-char start)
+             (while (re-search-forward "`[^`]+`" end t)
+               (add-text-properties
+                (match-beginning 0) (match-end 0)
+                '(face fennel-docstring-backtick-face))))
+           nil))))
+   'append)
+  (font-lock-flush)
+  (font-lock-ensure))
 
-(add-hook 'fennel-mode-hook #'fennel-font-lock-extend-docstrings)
+(defun fennel-enable-backtick-highlighting ()
+  "Enable backtick highlighting in Fennel files."
+  (when (derived-mode-p 'fennel-mode)
+    (highlight-backticks-in-quotes)))
+
+(add-hook 'fennel-mode-hook #'fennel-enable-backtick-highlighting)
 
 ;;; Highlight docstring words starting with a backtick and ending in a single quote.
 
