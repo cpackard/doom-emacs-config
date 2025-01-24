@@ -1,4 +1,4 @@
-;;; FENNEL-proto-repl.el --- Protocol-based REPL for Fennel -*- lexical-binding: t -*-
+;;; fennel-proto-repl.el --- Protocol-based REPL for Fennel -*- lexical-binding: t -*-
 ;; NOTE: personal copy with love2d logging edits.
 
 ;; Copyright © 2023 Phil Hagelberg and contributors
