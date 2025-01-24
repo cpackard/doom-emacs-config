@@ -2,9 +2,10 @@
 
 (defun fennel-love-2d-repl ()
   (interactive)
-  (setenv "LOVE_DEBUG" nil)
-  (let ((default-directory (doom-project-root)))
-    (fennel-proto-repl "love .")))
+  (with-environment-variables (("LOVE_DEBUG" "1")
+                               ("FENNEL_PROTO_REPL_ACTIVE" "1"))
+    (let ((default-directory (doom-project-root)))
+      (fennel-proto-repl "love ."))))
 
 (defun fennel-love-2d-base-repl ()
   (interactive)
@@ -203,4 +204,3 @@
     (define-key evil-motion-state-map (kbd "<tab>") nil)
     (evil-define-key 'normal outline-minor-mode-map (kbd "<tab>") #'my/outline-tab-behavior)
     (evil-define-key 'motion outline-minor-mode-map (kbd "<tab>") #'my/outline-tab-behavior)))
-
