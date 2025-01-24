@@ -2014,4 +2014,3 @@ Intended for use with the `company-mode' or `corfu' packages."
 ;;              (search-forward "(defvar fennel-proto-repl--protocol" nil t)
 ;;              (hs-hide-block)))
 ;; End:
-;;; fennel-proto-repl.el --- Protocol-based REPL for Fennel -*- lexical-binding: t -*-
