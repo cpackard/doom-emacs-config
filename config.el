@@ -167,5 +167,8 @@
   (fset 'epg-wait-for-status 'ignore))
 
 (after! tree-sitter
-  (set-face-attribute 'tree-sitter-hl-face:function.call nil :weight 'semi-bold))
-
+  (set-face-attribute 'tree-sitter-hl-face:function.call nil :weight 'semi-bold)
+  (setq treesit-extra-load-path
+        (list (file-name-concat
+               (file-name-parent-directory user-emacs-directory)
+               (format "straight/build-%s/tree-sitter-langs/bin" emacs-version)))))
