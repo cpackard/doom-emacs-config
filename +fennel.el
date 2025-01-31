@@ -60,9 +60,15 @@
   (let ((default-directory (doom-project-root)))
     (fennel-repl "love .")))
 
+(defun project-proto-repl ()
+  (let ((repls (fennel-proto-repl-live-repls)))
+    (when-let ((live-repl (car repls)))
+      live-repl)))
+
 (defun fennel-link-project-proto-repl ()
   (interactive)
-  (fennel-proto-repl-link-project-buffer))
+  (when-let ((live-repl (project-proto-repl)))
+    (fennel-proto-repl-link-buffer live-repl)))
 
 (defun reopen-buffer-file ()
   "Kill the current buffer and reopen the file it is visiting."
@@ -73,6 +79,33 @@
           (kill-buffer)
           (find-file file-name))
       (message "Buffer is not visiting a file!"))))
+
+(defun my/fennel-reload ()
+  (interactive)
+  (if (project-proto-repl)
+      (fennel-proto-repl-reload nil)
+    (fennel-reload nil)))
+
+(defun my/set-fennel-module-name ()
+  (interactive)
+  (when (doom-project-root)
+    (let* ((root (doom-project-root))
+           (filename (buffer-file-name (buffer-base-buffer)))
+           (path (abbreviate-file-name
+                  (if root
+                      (file-relative-name filename root)
+                    filename)))
+           (dotted-path (string-replace "/" "." path))
+           (module (string-replace ".fnl" "" dotted-path))
+           (module-name (if (s-ends-with? ".init" module)
+                            (string-replace ".init" "" module)
+                          module)))
+      (setq fennel-module-name module-name))))
+
+(defun my/enable-proto-repl-minor-mode ()
+  (interactive)
+  (when (project-proto-repl)
+    (fennel-proto-repl-minor-mode 1)))
 
 (after! fennel-mode
   (map! :after fennel-mode
@@ -93,9 +126,9 @@
          :desc "LÖVE base repl" "L" #'fennel-love-2d-base-repl
          :desc "macro expand" "m" #'fennel-proto-repl-macroexpand
          :desc "proto repl" "p" #'fennel-proto-repl
-         :desc "reload file" "r" #'fennel-reload
+         :desc "reload file" "r" #'my/fennel-reload
          :desc "base repl" "s" #'fennel-repl
-         :desc "join project repl" "z" #'fennel-proto-repl-link-project-buffer
+         :desc "join project repl" "z" #'fennel-link-project-proto-repl
          (:prefix ("e" . "eval")
           :desc "eval buffer" "b" #'fennel-proto-repl-eval-buffer
           :desc "eval last sexp" "e" #'fennel-proto-repl-eval-last-sexp
@@ -126,7 +159,7 @@
 ;;; Highlight docstring words surrounded by backticks.
 
 (defface fennel-docstring-backtick-face
-  '((t :foreground "dark cyan"))  ;; Choose your color
+  '((t :foreground "dark cyan")) ;; Choose your color
   "Face for highlighting backtick-surrounded words in Fennel docstrings."
   :group 'fennel)
 
@@ -199,6 +232,9 @@
 
   (add-hook 'fennel-mode-hook #'lsp)
   (add-hook 'fennel-mode-hook 'outline-minor-mode)
+  (add-hook 'fennel-mode-hook #'my/enable-proto-repl-minor-mode)
+  (add-hook 'fennel-mode-hook #'my/set-fennel-module-name)
+  (add-hook 'fennel-mode-hook #'fennel-link-project-proto-repl)
   (with-eval-after-load 'evil
     (define-key evil-normal-state-map (kbd "<tab>") nil)
     (define-key evil-motion-state-map (kbd "<tab>") nil)
