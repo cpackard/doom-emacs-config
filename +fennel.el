@@ -164,7 +164,7 @@
   :group 'fennel)
 
 (defun highlight-backticks-in-quotes ()
-  "Highlight words surrounded by backticks within double-quoted strings."
+  "Highlight words surrounded by backticks within double-quoted strings or ;; comment lines."
   (font-lock-add-keywords
    nil
    '(("\".*?\""
@@ -177,7 +177,7 @@
                 (match-beginning 0) (match-end 0)
                 '(face fennel-docstring-backtick-face))))
            nil)))
-     (";+.*?`[^`]+`"
+     (";+.*$"
       (0 (let ((start (match-beginning 0))
                (end (match-end 0)))
            (save-excursion
