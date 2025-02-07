@@ -72,6 +72,38 @@
   ;; (fennel-font-lock-setup)
   (add-hook 'paredit-mode-hook #'fennel-paredit-setup nil t))
 
+(defgroup fennel--tree-sitter-faces nil
+  "Faces for highlighting code."
+  :group 'treesit)
+
+(defface fennel--font-lock-property-name-face
+  '((default :inherit font-lock-constant-face :slant italic))
+  "Face for properties."
+  :group 'fennel--tree-sitter-faces)
+
+;; EB7186
+(defface fennel--font-lock-self-face
+  '((default :inherit font-lock-type-face :foreground "#ECB57B"))
+  "Face for the `self` keyword."
+  :group 'fennel--tree-sitter-faces)
+
+(defface fennel--font-lock-builtin-face
+  '((default :inherit font-lock-builtin-face :foreground "#7886DD"))
+  "Face for builtins."
+  :group 'fennel--tree-sitter-faces)
+
+;; goldenrod
+(defface fennel--font-lock-macro-call-face
+  '((default :inherit font-lock-preprocessor-face :slant italic :foreground "#EB7186"))
+  "Face for macro calls."
+  :group 'fennel--tree-sitter-faces)
+
+(defface fennel--font-lock-function-call-face
+  '((default :inherit (link font-lock-function-name-face) :underline nil :weight semi-bold))
+
+  "Face for function calls."
+  :group 'fennel--tree-sitter-faces)
+
 (defvar fennel--treesit-keywords
   (append fennel-keywords
           '("..."
@@ -86,6 +118,90 @@
 
 (defvar fennel--treesit-builtin-tables
   '("_G" "io" "math" "os"))
+
+(defconst fennel--treesit-import-macros-query
+  (treesit-query-compile
+   'fennel
+   '((import_macros_form
+      imports: (table_binding
+                item: (table_binding_pair value: (symbol_binding) @macro-import)))))
+  "Query for all macro imports.")
+
+(defconst fennel--treesit-macros-defun-query
+  (treesit-query-compile
+   'fennel
+   '((macro_form name: (symbol) @macro-import)))
+  "Query for all macro function definitions.")
+
+(defconst fennel--treesit-multi-sym-fn-defuns-query
+  (treesit-query-compile
+   'fennel
+   '((fn_form name: (multi_symbol base: (symbol_fragment) @multi-sym-base))))
+  "Query for all multi-sym function definitions.")
+
+(defun fennel--treesit-type-defun-p (node)
+  "Check whether NODE is a type definition."
+  (let* ((is-type-defun nil)
+         (root-node (treesit-buffer-root-node 'fennel))
+         (multi-sym-defuns (treesit-query-capture
+                            root-node
+                            fennel--treesit-multi-sym-fn-defuns-query)))
+    (dolist (pair multi-sym-defuns)
+      ;; (message "comparing fn def %s to local %s"
+      ;;          (treesit-node-text (cdr pair))
+      ;;          (treesit-node-text node))
+      (when (string-equal (treesit-node-text (cdr pair))
+                          (treesit-node-text node))
+        (setq is-type-defun t)))
+    is-type-defun))
+
+(defun fennel--treesit-fontify-type-defun (node override start end &rest _)
+  "Fontify type definitions.
+NODE is the symbol being called.
+OVERRIDE is the override flag described in `treesit-font-lock-rules'.
+START and END mark the region to be
+fontified."
+  (if (fennel--treesit-type-defun-p node)
+      (treesit-fontify-with-override
+       (treesit-node-start node) (treesit-node-end node)
+       'font-lock-type-face override start end)
+    (treesit-fontify-with-override
+     (treesit-node-start node) (treesit-node-end node)
+     'font-lock-variable-name-face override start end)))
+
+(defun fennel--treesit-macro-call-p (node)
+  "Check whether NODE is a macro call."
+  (let* ((is-macro-call nil)
+         (root-node (treesit-buffer-root-node 'fennel))
+         (macro-imports (treesit-query-capture
+                         root-node
+                         fennel--treesit-import-macros-query))
+         (macro-defuns (treesit-query-capture
+                        root-node
+                        fennel--treesit-macros-defun-query)))
+    (dolist (pair macro-imports)
+      (when (string-equal (treesit-node-text (cdr pair))
+                          (treesit-node-text node))
+        (setq is-macro-call t)))
+    (dolist (pair macro-defuns)
+      (when (string-equal (treesit-node-text (cdr pair))
+                          (treesit-node-text node))
+        (setq is-macro-call t)))
+    is-macro-call))
+
+(defun fennel--treesit-fontify-function-call (node override start end &rest _)
+  "Fontify function calls.
+NODE is the symbol being called.
+OVERRIDE is the override flag described in `treesit-font-lock-rules'.
+START and END mark the region to be
+fontified."
+  (if (fennel--treesit-macro-call-p node)
+      (treesit-fontify-with-override
+       (treesit-node-start node) (treesit-node-end node)
+       'fennel--font-lock-macro-call-face override start end)
+    (treesit-fontify-with-override
+     (treesit-node-start node) (treesit-node-end node)
+     'fennel--font-lock-function-call-face override start end)))
 
 (defvar fennel--treesit-settings
   (treesit-font-lock-rules
@@ -116,6 +232,7 @@
    '(((string open: _ @open) @font-lock-string-face
       (:match "[^:]" @open))
      (string open: ":") @font-lock-builtin-face
+     (table_pair value: (string) @font-lock-string-face)
      (string_binding ":") @font-lock-builtin-face
      (docstring content: (string_content)) @font-lock-doc-face)
 
@@ -136,12 +253,12 @@
    :override t
    '(
      ;; match any instance of `self' a keyword
-     ((symbol) @font-lock-type-face
-      (:match "\\`self\\'" @font-lock-type-face))
-     ((symbol_binding) @font-lock-type-face
-      (:match "\\`self\\'" @font-lock-type-face))
-     ((symbol_fragment) @font-lock-type-face
-      (:match "\\`self\\'" @font-lock-type-face)))
+     ((symbol) @fennel--font-lock-self-face
+      (:match "\\`self\\'" @fennel--font-lock-self-face))
+     ((symbol_binding) @fennel--font-lock-self-face
+      (:match "\\`self\\'" @fennel--font-lock-self-face))
+     ((symbol_fragment) @fennel--font-lock-self-face
+      (:match "\\`self\\'" @fennel--font-lock-self-face)))
 
    ;; L3 features
    :feature 'assignment
@@ -149,7 +266,7 @@
    '(
      ;; local / let / set / var
      (local_form
-      (binding_pair lhs: (symbol_binding) @font-lock-variable-name-face))
+      (binding_pair lhs: (symbol_binding) @fennel--treesit-fontify-type-defun))
      (let_form
       call: (symbol) @keyword
       vars: (let_vars
@@ -157,6 +274,9 @@
               lhs: (symbol_binding) @font-lock-variable-name-face)))
      (set_form
       (binding_pair lhs: (symbol_binding) @font-lock-warning-face))
+     (set_form
+      (binding_pair
+       lhs: (multi_symbol member: (symbol_fragment) @font-lock-warning-face :anchor)))
      (var_form
       (binding_pair
        lhs: (symbol_binding) @font-lock-warning-face))
@@ -190,8 +310,8 @@
 
    :feature 'builtin
    :language 'fennel
-   `(((symbol) @font-lock-builtin-face
-      (:match ,(regexp-opt fennel--treesit-builtins 'symbols) @font-lock-builtin-face))
+   `(((symbol) @fennel--font-lock-builtin-face
+      (:match ,(regexp-opt fennel--treesit-builtins 'symbols) @fennel--font-lock-builtin-face))
      (unquote_reader_macro expression: (symbol) @font-lock-warning-face))
 
    :feature 'number
@@ -206,6 +326,7 @@
    :feature 'constant
    :language 'fennel
    `(["true" "false"] @font-lock-constant-face
+     (nil) @font-lock-constant-face
      (multi_symbol
       base:
       ((symbol_fragment) @font-lock-constant-face
@@ -218,16 +339,20 @@
 
    :feature 'function
    :language 'fennel
-   '((list call: (symbol) @font-lock-function-call-face)
-     (multi_symbol
-      member:
-      (symbol_fragment) @font-lock-function-call-face :anchor)
+   '((list
+      call: [(symbol) @fennel--treesit-fontify-function-call
+             (multi_symbol
+              member:
+              (symbol_fragment) @fennel--font-lock-function-call-face :anchor)])
      (multi_symbol_method
-      method: (symbol_fragment) @font-lock-function-call-face))
+      method: (symbol_fragment) @fennel--font-lock-function-call-face))
 
    :feature 'property
    :language 'fennel
-   '((multi_symbol member: (symbol_fragment) @font-lock-property-name-face))))
+   :override 'append
+   '((multi_symbol member: (symbol_fragment) @fennel--font-lock-property-name-face)
+     (multi_symbol_method
+      method: (symbol_fragment) @fennel--font-lock-property-name-face))))
 
 (defun fennel-ts-setup ()
   "Setup treesit for fennel-ts-mode."
