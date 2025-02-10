@@ -155,6 +155,8 @@
 
 (+global-word-wrap-mode t)
 
+(global-visual-line-mode t)
+
 ;; Rebind C-v to scroll-up command to mimic expected Emacs functionality
 ;; of C-v / M-v for scrolling the page up and down respectively.
 ;; (map! :map vertico-map
