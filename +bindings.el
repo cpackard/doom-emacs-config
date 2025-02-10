@@ -130,6 +130,9 @@
       :niv "M-p" #'evil-paste-pop
       :niv "C-n" #'evil-next-line
       :niv "C-p" #'evil-previous-line
+      :niv "M-n" #'evil-force-normal-state
+      :nv "s-<up>" #'scroll-down-command
+      :nv "s-<down>" #'scroll-up-command
       :nv  "C-'" #'comment-dwim)
 
 ;; ------------------------------------------------
