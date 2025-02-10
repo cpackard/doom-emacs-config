@@ -35,6 +35,7 @@
 (require 'fennel-mode)
 (require 'treesit)
 
+;;; Base fennel setup
 (defun base-fennel-mode-setup ()
   (setq-local comment-add 1)            ; default to `;;' in comment-region
   (setq-local comment-column 40)
@@ -72,6 +73,7 @@
   ;; (fennel-font-lock-setup)
   (add-hook 'paredit-mode-hook #'fennel-paredit-setup nil t))
 
+;;; fennel-ts faces
 (defgroup fennel--tree-sitter-faces nil
   "Faces for highlighting code."
   :group 'treesit)
@@ -82,13 +84,16 @@
   :group 'fennel--tree-sitter-faces)
 
 ;; EB7186
+;; E9C49C
+;; DD78D3
 (defface fennel--font-lock-self-face
-  '((default :inherit font-lock-type-face :foreground "#ECB57B"))
+  '((default :inherit font-lock-type-face :foreground "#D4AA6C"))
   "Face for the `self` keyword."
   :group 'fennel--tree-sitter-faces)
 
 (defface fennel--font-lock-builtin-face
-  '((default :inherit font-lock-builtin-face :foreground "#7886DD"))
+  ;; '((default :inherit font-lock-builtin-face :foreground "#7886DD"))
+  '((default :inherit font-lock-keyword-face))
   "Face for builtins."
   :group 'fennel--tree-sitter-faces)
 
@@ -104,6 +109,7 @@
   "Face for function calls."
   :group 'fennel--tree-sitter-faces)
 
+;;; fennel-ts keywords and builtins
 (defvar fennel--treesit-keywords
   (append fennel-keywords
           '("..."
@@ -119,6 +125,7 @@
 (defvar fennel--treesit-builtin-tables
   '("_G" "io" "math" "os"))
 
+;;; custom queries used for font-lock
 (defconst fennel--treesit-import-macros-query
   (treesit-query-compile
    'fennel
@@ -203,6 +210,7 @@ fontified."
      (treesit-node-start node) (treesit-node-end node)
      'fennel--font-lock-function-call-face override start end)))
 
+;;; font lock rules
 (defvar fennel--treesit-settings
   (treesit-font-lock-rules
    ;; L1 features
@@ -217,13 +225,17 @@ fontified."
               base: (symbol_fragment) @font-lock-type-face
               member: (symbol_fragment) @font-lock-function-name-face)
              ((symbol) @font-lock-function-name-face)]
-      args: (sequence_arguments item: (symbol_binding) @font-lock-variable-name-face))
+      args: (sequence_arguments item: (symbol_binding) :? @font-lock-variable-name-face))
      ;; (fn_form
      ;;  name: (symbol) @font-lock-function-name-face
      ;;  args: (sequence_arguments item: (symbol_binding) @font-lock-variable-name-face))
      (macro_form
       name: (symbol) @font-lock-function-name-face
-      args: (sequence_arguments item: (symbol_binding) @font-lock-variable-name-face)))
+      args: (sequence_arguments item: (symbol_binding) @font-lock-variable-name-face))
+     (hashfn_reader_macro
+      macro: _ @font-lock-function-name-face
+      expression: (list item: ((symbol) @font-lock-variable-name-face
+                               (:match "$.*" @font-lock-variable-name-face)))))
 
 
    ;; L2 features
@@ -354,6 +366,23 @@ fontified."
      (multi_symbol_method
       method: (symbol_fragment) @fennel--font-lock-property-name-face))))
 
+;;; imenu
+(defun fennel--treesit-defun-name (node)
+  "Return the defun name of NODE.
+Return nil if there is no name or if NODE is not a defun node."
+  (pcase (treesit-node-type node)
+    ((or "fn_form" "macro_form")
+     (treesit-node-text
+      (treesit-node-child-by-field-name
+       node "name")
+      t))))
+
+;;; indent rules
+(defconst fennel--treesit-indent-rules
+  `((fennel
+     ((parent-is "case_guard") prev-sibling 0))))
+
+;;; treesitter setup
 (defun fennel-ts-setup ()
   "Setup treesit for fennel-ts-mode."
   ;; definition, type, assignment, builtin, constant, keyword,
@@ -372,18 +401,17 @@ fontified."
   (setq-local treesit-font-lock-settings fennel--treesit-settings)
   ;; (setq-local imenu-create-index-function
   ;;             #'fennel-imenu-treesit-create-index)
-  ;; (setq-local treesit-defun-type-regexp (rx (or "function" "class")
-  ;;                                           "_definition"))
-  ;; (setq-local treesit-defun-name-function
-  ;;             #'fennel--treesit-defun-name)
+  (setq-local treesit-defun-type-regexp (rx (or "fn" "macro")
+                                            "_form"))
+  (setq-local treesit-defun-name-function
+              #'fennel--treesit-defun-name)
 
   ;; (setq-local treesit-simple-indent-rules
   ;;             fennel-ts-indent-rules)
-  (message "starting fnl treesit-major-mode-setup...")
   (setq-local treesit-font-lock-level 4)
-  (treesit-major-mode-setup)
-  (message "finished fnl treesit-major-mode-setup."))
+  (treesit-major-mode-setup))
 
+;;; Define major mode
 ;;;###autoload
 (define-derived-mode fennel-ts-mode fennel-mode "Fennel-ts"
   "Major mode for editing Fennel files, using tree-sitter library.
@@ -394,9 +422,6 @@ fontified."
     (treesit-parser-create 'fennel)
     (fennel-ts-setup)
     (base-fennel-mode-setup)))
-;; (add-to-list 'auto-mode-alist '("\\.fnl\\'" . fennel-ts-mode))
-;; (add-to-list 'interpreter-mode-alist '("fennel" . fennel-ts-mode))
-
 
 ;;; FIXME: use the more explicit method mentioned here: https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
 ;;;###autoload

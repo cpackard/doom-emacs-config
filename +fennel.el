@@ -1,4 +1,7 @@
 ;;; +fennel.el -*- lexical-binding: t; -*-
+(after! tree-sitter
+  (require 'fennel-ts-mode)
+  (add-to-list 'auto-mode-alist '("\\.fnl\\'" . fennel-ts-mode)))
 
 (defun fennel-love-2d-repl ()
   (interactive)
@@ -113,245 +116,9 @@
 
 (add-hook 'fennel-mode-hook #'fennel-enable-backtick-highlighting)
 
-;;; Highlight docstring words starting with a backtick and ending in a single quote.
-
-;; (defface fennel-docstring-backtick-single-quote-face
-;;   '((t :foreground "dark cyan"))  ;; You can choose a different color if needed
-;;   "Face for highlighting words starting with a backtick and ending with a single quote in Fennel docstrings."
-;;   :group 'fennel)
-
-;; (defun fennel-font-lock-extend-docstrings-backtick-single-quote ()
-;;   (font-lock-add-keywords
-;;    nil
-;;    '(("`\\([^']+\\)'" 1 'fennel-docstring-backtick-single-quote-face prepend))))
-
-;; (add-hook 'fennel-mode-hook #'fennel-font-lock-extend-docstrings-backtick-single-quote)
-
 (defun nil-hash ()
   (interactive)
   (insert "#"))
-
-(defun my/fennel-tree-sitter-defaults ()
-  (let* ((keywords "#|%|\\\\*|\\\\+|-|->|->>|-\\\\?>|-\\\\?>>|\\\\.|\\\\.\\\\.|/|//|:|<|<=|=|>|>=|\\\\?\\\\.|\\\\^|\\\\$\\\\.\\\\.\\\\.\\\\.|accumulate|and|band|bnot|bor|bxor|collect|comment|do|doto|each|eval-compiler|fcollect|fn|for|global|hashfn|icollect|if|import-macros|include|lambda|length|let|local|lshift|lua|macro|macrodebug|macros|match|match-try|not|not=|or|partial|pick-args|pick-values|quote|require-macros|rshift|set|set-forcibly!|tset|values|var|when|while|with-open|~=|λ|faccumulate|case|case-try")
-         (function-builtins "pairs|ipairs|type|tostring|print|unpack|require")
-         (constant-builtins "_G|os|io|math")
-         (core "
-(comment) @comment
-
-(number) @number
-
-[\"false\" \"true\"] @boolean
-
-(if_form call: (symbol) @conditional)
-
-")
-         (self-patterns "
-(sequence_arguments
-  item: (
-    (symbol_binding) @type
-    (#eq? @type \"self\" )
-  )
-)
-
-(
-  (symbol) @type
-  (#eq? @type \"self\" )
-)
-
-(
-  (symbol_binding) @type
-  (#eq? @type \"self\" )
-)
-
-(
-  (symbol_fragment) @type
-  (#eq? @type \"self\" )
-)
-
-(fn_form
-  name: (multi_symbol
-          base: (symbol_fragment) @type
-          member: (symbol_fragment) @function))
-
-")
-         (locals-patterns "
-(local_form
-  call: (symbol) @keyword
-  (binding_pair
-    lhs: (symbol_binding) @variable
-  )
-)
-
-(let_form
-  call: (symbol) @keyword
-  vars: (let_vars
-    (binding_pair
-      lhs: (symbol_binding) @variable
-    )
-  )
-)
-
-(set_form
-  call: (symbol) @keyword
-  (binding_pair lhs: (symbol_binding) @variable.special)
-)
-
-(var_form
-  call: (symbol) @keyword
-  (binding_pair
-    lhs: (symbol_binding) @variable.special
-  )
-)
-
-")
-         (fn-patterns "
-(fn_form
-  call: (symbol) @keyword
-  name: (symbol)? @function
-  args: (sequence_arguments item: (symbol_binding) @variable.parameter)?
-  docstring: (docstring content: (string_content) @doc)?
-)
-")
-         (rest-patterns "
-(rest_binding
-  lhs: (symbol_option) @keyword
-  rhs: (symbol_binding) @variable
-)
-")
-         (macro-patterns "
-(import_macros_form call: (symbol) @keyword)
-
-(hashfn_reader_macro macro: \"#\" @keyword)
-
-(macro_form
-  call: (symbol) @keyword
-  name: (symbol) @function
-  args: (sequence_arguments item: (symbol_binding) @variable.parameter)?
-  docstring: (docstring content: (string_content) @doc)?
-)
-
-(unquote_reader_macro expression: (symbol) @variable.special)
-
-(icollect_form
-  call: (symbol) @keyword
-
-)
-
-(accumulate_form
-  call: (symbol) @keyword
-  iter_body: (iter_body
-    (accumulator_pair accumulator_binding: (symbol_binding) @variable.special)
-  )
-)
-
-(faccumulate_form
-  call: (symbol) @keyword
-  iter_body: (for_iter_body
-    (accumulator_pair accumulator_binding: (symbol_binding) @variable.special)
-    index: (symbol_binding) @variable
-  )
-)
-
-(iter_option option: (symbol_option) @keyword)
-
-")
-         (case-patterns "
-(case_form
-   call: (symbol) @keyword.conditional
-)
-
-(case_pair
-  lhs: [
-    (symbol_binding) @variable
-    (sequence_binding item: (symbol_binding) @variable)
-  ]
-)
-
-(case_guard
-  call: (symbol) @keyword.conditional
-  item: (symbol_binding) @variable
-)
-")
-         (table-patterns "
-(table_binding_pair
-  value: (symbol_binding) @variable
-)
-
-(table_pair
-  value: (symbol) @variable
-)
-
-")
-         (defaults (format
-                    "
-(multi_symbol member: (symbol_fragment) @property)
-
-(multi_symbol_method
-  method: (symbol_fragment) @method.call
-)
-
-(iter_body binding: (symbol_binding) @variable )
-
-((symbol) @keyword
- (#match? @keyword \"^(%s)$\"
-))
-
-(
-  (symbol_binding) @keyword
-  (#eq? @keyword \"...\")
-)
-
-(
-  (symbol) @keyword
-  (#eq? @keyword \"$...\")
-)
-
-((symbol) @function.builtin
- (#match? @function.builtin \"^(%s)$\"
-))
-
-((symbol) @constant.builtin
- (#match? @constant.builtin \"^(%s)$\"
-))
-
-(multi_symbol
-  base:
-    ((symbol_fragment) @constant.builtin
-     (#match? @constant.builtin \"^(%s)$\"
-    ))
-)
-
-(list
-  call:
-    ((symbol) @function.call
-     (#not-match? @function.call \"^(%s)$\"
-    ))
-)
-
-(list_binding item: (symbol_binding) @variable)
-
-(string_binding open: \":\") @constant
-(string open: \":\") @constant
-(string_content (escape_sequence) @escape)
-(string) @string
-
-"
-                    keywords
-                    function-builtins
-                    constant-builtins
-                    constant-builtins
-                    keywords))
-         (all-patterns (concat core
-                               self-patterns
-                               locals-patterns
-                               fn-patterns
-                               rest-patterns
-                               macro-patterns
-                               case-patterns
-                               table-patterns
-                               defaults)))
-    (setq-local tree-sitter-hl-default-patterns all-patterns)
-    nil))
 
 (after! fennel-mode
   (defun project-proto-repl ()
@@ -401,8 +168,6 @@
     (interactive)
     (when (project-proto-repl)
       (fennel-proto-repl-minor-mode 1)))
-
-
 
   (map! :after fennel-mode
         :map fennel-mode-map
@@ -460,7 +225,7 @@
     (add-hook 'fennel-mode-hook #'my/enable-proto-repl-minor-mode)
     (add-hook 'fennel-mode-hook #'my/set-fennel-module-name)
     (add-hook 'fennel-mode-hook #'fennel-link-project-proto-repl)
-    (add-hook 'fennel-mode-hook #'my/fennel-tree-sitter-defaults)
+
     (with-eval-after-load 'evil
       (define-key evil-normal-state-map (kbd "<tab>") nil)
       (define-key evil-motion-state-map (kbd "<tab>") nil)
