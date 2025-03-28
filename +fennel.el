@@ -243,6 +243,13 @@
          :desc "rerun" "r" #'fennel-test-last
          :desc "module" "t" #'fennel-test-module))
 
+  (defun insert-lambda ()
+    "Insert the lowercase lambda character (λ) at point."
+    (interactive)
+    (insert "λ"))
+
+  (map! :i "M-l" #'insert-lambda)
+
   (with-eval-after-load 'lispy
     (lispy-define-key lispy-mode-map "#" 'nil-hash)
     (setq lispy-parens-preceding-syntax-alist
