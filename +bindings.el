@@ -114,7 +114,7 @@
 ;; By default, =[= and =]= are [[https://github.com/noctuid/lispyville/tree/master#additional-movement-key-theme][bound]] to =lispyville-previous-opening= and
 ;; =lispyville-next-closing= respectively. If you use a language which makes frequent
 ;; use of brackets (e.g. Clojure, Racket, Scheme), you can insert a bracket pair =[]=
-;; by typing ={=. If you prefer to use the bracket keys for input, you can rebind
+;; by typing =}=. If you prefer to use the bracket keys for input, you can rebind
 ;; them like below:
 (map! :after (lispy lispyville)
       :map lispy-mode-map-lispy
