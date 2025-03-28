@@ -134,7 +134,7 @@
 
   (defun reopen-buffer-file ()
     "Kill the current buffer and reopen the file it is visiting."
-    (interactive)        ; Make the function callable via M-x and keybindings.
+    (interactive)          ; Make the function callable via M-x and keybindings.
     (let ((file-name (buffer-file-name)))
       (if file-name
           (progn
@@ -206,6 +206,43 @@
          :desc "rerun" "r" #'fennel-test-last
          :desc "module" "t" #'fennel-test-module))
 
+  (map! :after fennel-ts-mode
+        :map fennel-ts-mode-map
+        :localleader
+        (:prefix ("b" . "buffer")
+         :desc "reopen buffer file" "r" #'reopen-buffer-file)
+        (:prefix ("=" . "format")
+         :desc "format buffer" "=" #'fennel-format
+         :desc "format region" "r" #'fennel-format-region)
+        ;; (:prefix ("l" . "lsp")
+        ;;  :desc "update lsp config" "c" #'fnl-lsp-config)
+        (:prefix ("r" . "repl")
+         :desc "comma command" "," #'fennel-proto-repl-comma-command
+         :desc "develop repl" "d" #'fennel-love-2d-repl-debug
+         :desc "interrupt repl" "i" #'fennel-proto-repl-interrupt
+         :desc "LÖVE repl" "l" #'fennel-love-2d-repl
+         :desc "LÖVE base repl" "L" #'fennel-love-2d-base-repl
+         :desc "macro expand" "m" #'fennel-proto-repl-macroexpand
+         :desc "proto repl" "p" #'fennel-proto-repl
+         :desc "reload file" "r" #'my/fennel-reload
+         :desc "base repl" "s" #'fennel-repl
+         :desc "join project repl" "z" #'fennel-link-project-proto-repl
+         (:prefix ("e" . "eval")
+          :desc "eval buffer" "b" #'fennel-proto-repl-eval-buffer
+          :desc "eval last sexp" "e" #'fennel-proto-repl-eval-last-sexp
+          :desc "eval defun" "f" #'fennel-proto-repl-eval-defun
+          :desc "eval last & next" "n" #'fennel-proto-repl-eval-form-and-next
+          :desc "eval current form" "p" #'fennel-proto-repl-eval-print-last-sexp
+          :desc "eval region" "r" #'fennel-proto-repl-eval-region)
+         (:prefix ("h" . "help")
+          :desc "show args" "a" #'fennel-proto-repl-show-arglist
+          :desc "show docs" "d" #'fennel-proto-repl-show-documentation
+          :desc "show var docs" "v" #'fennel-proto-repl-show-var-documentation))
+        (:prefix ("t" . "test")
+         :desc "all" "a" #'fennel-test-all
+         :desc "rerun" "r" #'fennel-test-last
+         :desc "module" "t" #'fennel-test-module))
+
   (with-eval-after-load 'lispy
     (lispy-define-key lispy-mode-map "#" 'nil-hash)
     (setq lispy-parens-preceding-syntax-alist
@@ -225,6 +262,12 @@
     (add-hook 'fennel-mode-hook #'my/enable-proto-repl-minor-mode)
     (add-hook 'fennel-mode-hook #'my/set-fennel-module-name)
     (add-hook 'fennel-mode-hook #'fennel-link-project-proto-repl)
+
+    (add-hook 'fennel-ts-mode-hook #'lsp)
+    (add-hook 'fennel-ts-mode-hook 'outline-minor-mode)
+    (add-hook 'fennel-ts-mode-hook #'my/enable-proto-repl-minor-mode)
+    (add-hook 'fennel-ts-mode-hook #'my/set-fennel-module-name)
+    (add-hook 'fennel-ts-mode-hook #'fennel-link-project-proto-repl)
 
     (with-eval-after-load 'evil
       (define-key evil-normal-state-map (kbd "<tab>") nil)
