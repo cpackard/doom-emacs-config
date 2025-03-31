@@ -142,26 +142,46 @@
             (find-file file-name))
         (message "Buffer is not visiting a file!"))))
 
+  (defun my/get-fennel-module-name ()
+    (let* ((root (doom-project-root))
+           (filename (buffer-file-name (buffer-base-buffer)))
+           (path (abbreviate-file-name
+                  (if root
+                      (file-relative-name filename root)
+                    filename)))
+           (dotted-path (string-replace "/" "." path))
+           (module (string-replace ".fnl" "" dotted-path))
+           (module-name (if (s-ends-with? ".init" module)
+                            (string-replace ".init" "" module)
+                          module)))
+
+      module-name))
+
+  (defun my/reload-parent-modules (module)
+    (let* ((module-name module)
+           (dirs (split-string module-name "\\."))
+           (bl (butlast dirs))
+           (parent-dir (string-join bl ".")))
+      (setq module-name parent-dir)
+
+      (when (not (string-equal "src" module-name))
+        (message "reloading %s" module-name)
+        (fennel-reload-form module-name)
+        (my/reload-parent-modules module-name))))
+
   (defun my/fennel-reload ()
     (interactive)
     (if (project-proto-repl)
         (fennel-proto-repl-reload nil)
-      (fennel-reload nil)))
+      (let ((module-name (my/get-fennel-module-name)))
+        (message "reloading %s" module-name)
+        (fennel-reload nil)
+        (my/reload-parent-modules module-name))))
 
   (defun my/set-fennel-module-name ()
     (interactive)
     (when (doom-project-root)
-      (let* ((root (doom-project-root))
-             (filename (buffer-file-name (buffer-base-buffer)))
-             (path (abbreviate-file-name
-                    (if root
-                        (file-relative-name filename root)
-                      filename)))
-             (dotted-path (string-replace "/" "." path))
-             (module (string-replace ".fnl" "" dotted-path))
-             (module-name (if (s-ends-with? ".init" module)
-                              (string-replace ".init" "" module)
-                            module)))
+      (let* ((module-name (my/get-fennel-module-name)))
         (setq fennel-module-name module-name))))
 
   (defun my/enable-proto-repl-minor-mode ()
