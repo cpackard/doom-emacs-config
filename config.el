@@ -129,7 +129,7 @@
 (load! "+keys.el")
 
 ;; copilot settings
-(load! "+copilot.el")
+                                        ;(load! "+copilot.el")
 
 ;; rust settings
 (load! "+rust.el")
@@ -156,6 +156,10 @@
 (+global-word-wrap-mode t)
 
 (global-visual-line-mode t)
+
+(after! lsp-mode
+  (setq lsp-copilot-enabled nil)
+  (setq lsp-copilot-server-disabled-languages '(fennel)))
 
 ;; Rebind C-v to scroll-up command to mimic expected Emacs functionality
 ;; of C-v / M-v for scrolling the page up and down respectively.
