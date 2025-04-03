@@ -226,6 +226,12 @@ fontified."
               member: (symbol_fragment) @font-lock-function-name-face)
              ((symbol) @font-lock-function-name-face)]
       args: (sequence_arguments item: (symbol_binding) :? @font-lock-variable-name-face))
+     (lambda_form
+      name: [(multi_symbol
+              base: (symbol_fragment) @font-lock-type-face
+              member: (symbol_fragment) @font-lock-function-name-face)
+             ((symbol) @font-lock-function-name-face)]
+      args: (sequence_arguments item: (symbol_binding) :? @font-lock-variable-name-face))
      ;; (fn_form
      ;;  name: (symbol) @font-lock-function-name-face
      ;;  args: (sequence_arguments item: (symbol_binding) @font-lock-variable-name-face))
