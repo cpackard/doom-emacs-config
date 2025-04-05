@@ -212,11 +212,11 @@
          :desc "join project repl" "z" #'fennel-link-project-proto-repl
          (:prefix ("e" . "eval")
           :desc "eval buffer" "b" #'fennel-proto-repl-eval-buffer
-          :desc "eval last sexp" "e" #'fennel-proto-repl-eval-last-sexp
+          :desc "eval last sexp" "e" #'fennel-eval-last-sexp
           :desc "eval defun" "f" #'fennel-proto-repl-eval-defun
-          :desc "eval last & next" "n" #'fennel-proto-repl-eval-form-and-next
-          :desc "eval current form" "p" #'fennel-proto-repl-eval-print-last-sexp
-          :desc "eval region" "r" #'fennel-proto-repl-eval-region)
+          :desc "eval last & next" "n" #'fennel-eval-form-and-next
+          :desc "eval current form" "p" #'fennel-eval-toplevel-form
+          :desc "eval region" "r" #'fennel-eval-region)
          (:prefix ("h" . "help")
           :desc "show args" "a" #'fennel-proto-repl-show-arglist
           :desc "show docs" "d" #'fennel-proto-repl-show-documentation
@@ -249,11 +249,11 @@
          :desc "join project repl" "z" #'fennel-link-project-proto-repl
          (:prefix ("e" . "eval")
           :desc "eval buffer" "b" #'fennel-proto-repl-eval-buffer
-          :desc "eval last sexp" "e" #'fennel-proto-repl-eval-last-sexp
+          :desc "eval last sexp" "e" #'fennel-eval-last-sexp
           :desc "eval defun" "f" #'fennel-proto-repl-eval-defun
-          :desc "eval last & next" "n" #'fennel-proto-repl-eval-form-and-next
-          :desc "eval current form" "p" #'fennel-proto-repl-eval-print-last-sexp
-          :desc "eval region" "r" #'fennel-proto-repl-eval-region)
+          :desc "eval last & next" "n" #'fennel-eval-form-and-next
+          :desc "eval current form" "p" #'fennel-eval-toplevel-form
+          :desc "eval region" "r" #'fennel-eval-region)
          (:prefix ("h" . "help")
           :desc "show args" "a" #'fennel-proto-repl-show-arglist
           :desc "show docs" "d" #'fennel-proto-repl-show-documentation
