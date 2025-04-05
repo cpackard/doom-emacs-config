@@ -112,7 +112,8 @@
 ;;; fennel-ts keywords and builtins
 (defvar fennel--treesit-keywords
   (append fennel-keywords
-          '("..."
+          '("&as"
+            "..."
             "$...")
           nil))
 
