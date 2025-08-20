@@ -13,7 +13,7 @@
 ;; fd as Esc key binding
 ;; https://discourse.doomemacs.org/t/typing-jk-deletes-j-and-returns-to-normal-mode/59/7
 (after! evil-escape
-  (setq evil-escape-key-sequence "ht"))
+  (setq evil-escape-key-sequence "gc"))
 
 ;; https://discourse.doomemacs.org/t/what-are-leader-and-localleader-keys/153
 ;; Doom Defaults: `SPC' leader key, `SPC m' local leader
