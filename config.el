@@ -164,9 +164,24 @@
 
 (global-visual-line-mode t)
 
+(add-to-list 'exec-path (expand-file-name "~/.local/bin"))
+(add-to-list 'exec-path (expand-file-name "/Library/TeX/texbin"))
+
 (after! lsp-mode
   (setq lsp-copilot-enabled nil)
-  (setq lsp-copilot-server-disabled-languages '(fennel)))
+  (setq lsp-copilot-applicable-fn (-const nil))
+  (setq lsp-copilot-server-disabled-languages '(fennel python)))
+
+(after! pdf-tools
+  ;; Enable auto-refresh for PDF documents
+  (setq pdf-view-use-scaling t)
+  (setq pdf-view-use-imagemagick nil)
+
+  ;; Auto-revert PDF buffers when file changes
+  (add-hook 'pdf-view-mode-hook
+            (lambda ()
+              (auto-revert-mode 1)
+              (setq auto-revert-interval 1))))  ; Check every 1 second
 
 ;; Rebind C-v to scroll-up command to mimic expected Emacs functionality
 ;; of C-v / M-v for scrolling the page up and down respectively.
@@ -178,10 +193,3 @@
   (setf epg-pinentry-mode 'loopback)
   ;; Hack for Emacs 29.1
   (fset 'epg-wait-for-status 'ignore))
-
-(after! tree-sitter
-  (set-face-attribute 'tree-sitter-hl-face:function.call nil :weight 'semi-bold)
-  (setq treesit-extra-load-path
-        (list (file-name-concat
-               (file-name-parent-directory user-emacs-directory)
-               (format "straight/build-%s/tree-sitter-langs/bin" emacs-version)))))
