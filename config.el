@@ -86,6 +86,13 @@
   (setq doom-modeline-persp-name t
         doom-modeline-major-mode-icon t))
 
+(after! tree-sitter
+  (set-face-attribute 'tree-sitter-hl-face:function.call nil :weight 'semi-bold)
+  (setq treesit-extra-load-path
+        (list (file-name-concat
+               (file-name-parent-directory user-emacs-directory)
+               (format "straight/build-%s/tree-sitter-langs/bin" emacs-version)))))
+
 ;; Start Doom Emacs maximized
 (add-hook 'window-setup-hook #'toggle-frame-fullscreen)
 
