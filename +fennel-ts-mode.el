@@ -292,10 +292,11 @@ fontified."
              (binding_pair
               lhs: (symbol_binding) @font-lock-variable-name-face)))
      (set_form
-      (binding_pair lhs: (symbol_binding) @font-lock-warning-face))
+      call: _
+      lhs: (symbol) @font-lock-warning-face)
      (set_form
-      (binding_pair
-       lhs: (multi_symbol member: (symbol_fragment) @font-lock-warning-face :anchor)))
+      call: _
+      lhs: (multi_symbol member: (symbol_fragment) @font-lock-warning-face :anchor))
      (var_form
       (binding_pair
        lhs: (symbol_binding) @font-lock-warning-face))
@@ -425,10 +426,23 @@ Return nil if there is no name or if NODE is not a defun node."
 
 \\{fennel-ts-mode-map}"
   :syntax-table fennel-mode-syntax-table
-  (when (treesit-ready-p 'fennel)
-    (treesit-parser-create 'fennel)
-    (fennel-ts-setup)
-    (base-fennel-mode-setup)))
+  (progn
+    (when (and (not (treesit-ready-p 'fennel)) (not treesit-extra-load-path))
+      ;; TODO: figure out how to get an `after!' hook working for `tree-sitter'
+      ;; so this can live in the user config rather than this file.
+      (setq treesit-extra-load-path
+            (list (file-name-concat
+                   (file-name-parent-directory user-emacs-directory)
+                   (format "straight/build-%s/tree-sitter-langs/bin" emacs-version)))))
+    (when (treesit-ready-p 'fennel)
+      (treesit-parser-create 'fennel)
+      (fennel-ts-setup)
+      (base-fennel-mode-setup))))
+
+;; NOTE: when updating this file you MUST byte-compile it
+;; for emacs to pick up the changes!
+;; In doom emacs, you can run `C-c C-f` when visiting the fennel-ts-mode.el file
+;; to run the `elisp-byte-compile-file` function.
 
 ;;; FIXME: use the more explicit method mentioned here: https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
 ;;;###autoload
