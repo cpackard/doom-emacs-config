@@ -20,7 +20,7 @@
   (interactive)
   (setenv "LOVE_DEBUG" "1")
   (let ((default-directory (doom-project-root)))
-    (fennel-repl "love . --debug")))
+    (fennel-repl "love .")))
 
 (defun file-to-module ()
   "Convert a fennel filename to module format."
@@ -121,6 +121,8 @@
   (insert "#"))
 
 (after! fennel-mode
+  (autoload 'love2d-fennel "./love2d-fennel.el" nil t)
+
   (defun project-proto-repl ()
     (when (functionp #'fennel-proto-repl-live-repls)
       (let ((repls (fennel-proto-repl-live-repls)))
@@ -301,3 +303,66 @@
       (define-key evil-motion-state-map (kbd "<tab>") nil)
       (evil-define-key 'normal outline-minor-mode-map (kbd "<tab>") #'my/outline-tab-behavior)
       (evil-define-key 'motion outline-minor-mode-map (kbd "<tab>") #'my/outline-tab-behavior))))
+
+;;; Docstrings in the Fennel REPL's completion popup
+;; fennel-complete returns bare candidates, so company/corfu have no doc
+;; source for the selected one. `,doc' is that source.
+(defvar +fennel-doc-cache (make-hash-table :test 'equal)
+  "Cache of `,doc' output, keyed by symbol name.")
+
+(defun +fennel-doc-string (candidate)
+  "Ask the running Fennel REPL for CANDIDATE's docstring, or nil."
+  (when-let* ((sym (and candidate (substring-no-properties (format "%s" candidate))))
+              (proc (ignore-errors (inferior-lisp-proc))))
+    (let ((cached (gethash sym +fennel-doc-cache 'miss)))
+      (if (not (eq cached 'miss))
+          cached
+        (puthash
+         sym
+         (when-let ((buf (fennel-repl-redirect-one
+                          proc (format ",doc %s" sym) " *fennel-doc*")))
+           (with-current-buffer buf
+             (let* ((raw (ansi-color-apply
+                          (buffer-substring-no-properties (point-min) (point-max))))
+                    ;; the game logs to the same stdout the REPL answers on,
+                    ;; so a "[info reload] ..." line can land mid-redirect
+                    (text (string-trim
+                           (string-join
+                            (seq-remove
+                             (lambda (l)
+                               (string-match-p
+                                "\\`\\[\\(debug\\|info\\|warn\\|error\\)\\b" l))
+                             (split-string raw "\n"))
+                            "\n"))))
+               (unless (or (string-empty-p text)
+                           (string-suffix-p "not found" text))
+                 text))))
+         +fennel-doc-cache)))))
+
+(defun +fennel-doc-buffer (candidate)
+  "A buffer holding CANDIDATE's docstring, for `:company-doc-buffer'."
+  (when-let ((doc (+fennel-doc-string candidate)))
+    (with-current-buffer (get-buffer-create " *fennel-capf-doc*")
+      (erase-buffer)
+      (insert doc)
+      (goto-char (point-min))
+      (current-buffer))))
+
+(defun +fennel-docsig (candidate)
+  "CANDIDATE's arglist line, for the echo area."
+  (car (split-string (or (+fennel-doc-string candidate) "") "\n" t)))
+
+(defun +fennel-complete-with-docs (result)
+  (when result
+    (append result (list :company-doc-buffer #'+fennel-doc-buffer
+                         :company-docsig    #'+fennel-docsig))))
+
+(after! fennel-mode
+  (advice-add 'fennel-complete :filter-return #'+fennel-complete-with-docs)
+  ;; docstrings change under you on hot-reload; drop the cache whenever you
+  ;; actually evaluate something (completion redirects bypass this hook)
+  (add-hook 'fennel-repl-mode-hook
+            (lambda ()
+              (add-hook 'comint-input-filter-functions
+                        (lambda (_) (clrhash +fennel-doc-cache) nil)
+                        nil t))))
