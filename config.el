@@ -148,7 +148,7 @@
 (load! "+irc.el")
 
 ;; NOTE: cpackard added these 05/22/2023
-(setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
+;; (setq parinfer-rust-library "~/.emacs.d/parinfer-rust/parinfer-rust-darwin.so")
 
 ;;   > Checking Doom core for irregularities...
 ;; ! Your $HOME is recognized as a project root
@@ -193,3 +193,7 @@
   (setf epg-pinentry-mode 'loopback)
   ;; Hack for Emacs 29.1
   (fset 'epg-wait-for-status 'ignore))
+
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))

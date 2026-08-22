@@ -83,3 +83,4 @@
 ;; https://github.com/roman/golden-ratio.el
 (package! golden-ratio)
 
+(package! magit-todos)
