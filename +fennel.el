@@ -1,7 +1,4 @@
 ;;; +fennel.el -*- lexical-binding: t; -*-
-(after! tree-sitter
-  (require 'fennel-ts-mode)
-  (add-to-list 'auto-mode-alist '("\\.fnl\\'" . fennel-ts-mode)))
 
 (defun fennel-love-2d-repl ()
   (interactive)
@@ -20,7 +17,7 @@
   (interactive)
   (setenv "LOVE_DEBUG" "1")
   (let ((default-directory (doom-project-root)))
-    (fennel-repl "love .")))
+    (fennel-proto-repl "love .")))
 
 (defun file-to-module ()
   "Convert a fennel filename to module format."
@@ -122,6 +119,11 @@
 
 (after! fennel-mode
   (autoload 'love2d-fennel "./love2d-fennel.el" nil t)
+
+  (after! tree-sitter
+    (require 'fennel-ts-mode)
+    (add-to-list 'auto-mode-alist '("\\.fnl\\'" . fennel-ts-mode))
+    (add-hook 'fennel-ts-mode-hook 'fennel-proto-repl-minor-mode))
 
   (defun project-proto-repl ()
     (when (functionp #'fennel-proto-repl-live-repls)
@@ -366,3 +368,86 @@
               (add-hook 'comint-input-filter-functions
                         (lambda (_) (clrhash +fennel-doc-cache) nil)
                         nil t))))
+
+(defvar +fnl-markup-faces
+  '(font-lock-comment-face font-lock-comment-delimiter-face
+    font-lock-doc-face font-lock-doc-markup-face)
+  "Faces whose regions get markdown-ish rendering.")
+
+(defvar +fnl-markup-italic t
+  "Set to nil if *earmuffed* names get mistaken for emphasis.")
+
+(defun +fnl-markup-region-p (pos)
+  (let* ((f (get-text-property pos 'face))
+         (fs (if (listp f) f (list f))))
+    (or (seq-some (lambda (x) (memq x +fnl-markup-faces)) fs)
+        (nth 4 (syntax-ppss pos)))))          ; fallback: plain comment
+
+(defun +fnl-markup-matcher (regexp)
+  "Font-lock MATCHER for REGEXP, restricted to comments/docstrings."
+  (lambda (limit)
+    (let (found)
+      (while (and (not found) (re-search-forward regexp limit t))
+        ;; probe both ends: line-anchored regexps start *outside* the comment
+        (when (or (+fnl-markup-region-p (match-beginning 0))
+                  (+fnl-markup-region-p (max (point-min) (1- (match-end 0)))))
+          (setq found t)))
+      found)))
+
+(defun +fnl-markup-keywords ()
+  (append
+   `((,(+fnl-markup-matcher "^\\s-*\\(;;;;+.*\\)$")
+      (1 'markdown-header-face-2 prepend))
+     (,(+fnl-markup-matcher "^\\s-*;;+ \\(#+ .*\\)$")
+      (1 'markdown-header-face-3 prepend))
+     (,(+fnl-markup-matcher "^\\s-*;;+\\(?:  \\)\\s-*[^ \n].*$")
+      (0 'markdown-code-face prepend))
+     (,(+fnl-markup-matcher "^\\s-*;;+\\s-+\\([-+*]\\|[0-9]+\\.\\)\\s-")
+      (1 'markdown-list-face prepend))
+     (,(+fnl-markup-matcher "\\*\\*[^*\n]+?\\*\\*")
+      (0 'markdown-bold-face prepend))
+     (,(+fnl-markup-matcher "`[^`\n]+?`")
+      (0 'markdown-inline-code-face prepend))
+     (,(+fnl-markup-matcher "\\[\\([^]\n]+\\)\\](\\([^)\n]+\\))")
+      (1 'markdown-link-face prepend) (2 'markdown-url-face prepend)))
+   (when +fnl-markup-italic
+     `((,(+fnl-markup-matcher
+          "\\(?:^\\|[[:space:](]\\)\\(\\*[^*\n]+?\\*\\)\\(?:[[:space:]).,;:!?]\\|$\\)")
+        (1 'markdown-italic-face prepend))))))
+
+(defun +fnl-markdownish-comments-h ()
+  (require 'markdown-mode nil t)             ; needed for the faces
+  (font-lock-add-keywords nil (+fnl-markup-keywords) 'append)
+  (goto-address-prog-mode +1)                ; live URLs in comments, free
+  (font-lock-flush))
+
+(add-hook 'fennel-mode-hook #'+fnl-markdownish-comments-h)
+
+(after! markdown-mode
+  (add-to-list 'markdown-code-lang-modes '("fnl" . fennel-mode))
+  (setq markdown-fontify-code-blocks-natively t))
+
+(defvar resonance/fennel-proto-repl--async-callback nil
+  "Permanent callback for the game's idle (id 0) output.")
+
+(defun resonance/fennel-proto-repl-async-output (fn id)
+  "Resolve id 0 to an async-output callback, the way FN resolves -1."
+  (or (funcall fn id)
+      (when (and (= id 0)
+                 fennel-proto-repl--buffer
+                 (buffer-live-p (get-buffer fennel-proto-repl--buffer)))
+        (or resonance/fennel-proto-repl--async-callback
+            (setq resonance/fennel-proto-repl--async-callback
+                  (make-fennel-proto-repl-callback
+                   :values #'ignore
+                   :error  #'fennel-proto-repl--error-handler
+                   :print  #'fennel-proto-repl--print))))))
+
+(advice-add 'fennel-proto-repl--get-callbacks
+            :around #'resonance/fennel-proto-repl-async-output)
+
+(after! fennel-mode
+  (setq fennel-proto-repl-eldoc-fontify-markdown t))
+
+(advice-add 'fennel-proto-repl--font-lock-doc-buffer :before
+            (lambda (&rest _) (setq-local markdown-hide-markup t)))
